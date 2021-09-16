@@ -1,4 +1,5 @@
 .idea
+.idea/**
 
 src/data/**
 src/checkpoints/**

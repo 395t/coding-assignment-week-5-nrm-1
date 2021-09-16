@@ -2,6 +2,12 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 
+"""
+This file holds functions for fetching train, test, validation data loaders for different datasets.
+
+Some functions are reused from https://github.com/395t/coding-assignment-week-4-opt-1/blob/main/notebooks/MomentumExperiments.ipynb
+"""
+
 _transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
