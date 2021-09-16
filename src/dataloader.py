@@ -1,6 +1,9 @@
 import torch
-from torchvision.utils import data
+from torch.utils import data
 from torchvision import datasets
+
+
+__all__ = ["get_dataloder"]
 
 
 def get_dataloder(name, batch_size):
