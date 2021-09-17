@@ -24,6 +24,7 @@ def get_device():
 
 def train(net: torch.nn.Module, optimizer: torch.optim.Optimizer, trainloader, epochs: int = 10):
     device = get_device()
+    net.to(device)
     net.train()
 
     metrics = {}
@@ -64,6 +65,7 @@ def train(net: torch.nn.Module, optimizer: torch.optim.Optimizer, trainloader, e
 
 def test_validation(net: torch.nn.Module, validloader):
     device = get_device()
+    net.to(device)
 
     val_loss = 0
     total_images = 0
@@ -93,6 +95,7 @@ def test_validation(net: torch.nn.Module, validloader):
 
 def test(net: torch.nn.Module, testloader):
     device = get_device()
+    net.to(device)
 
     metrics = {}
 
@@ -134,6 +137,6 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(net.parameters(), lr=LR)
 
 
-    # train(net, optimizer, train_dataloader, epochs=3)
-    test(net, test_dataloader)
+    train(net, optimizer, train_dataloader, epochs=3)
+    # test(net, test_dataloader)
     save_model(net, 'test')
