@@ -1,10 +1,11 @@
 import src
+import pickle as pkl
 import torch
 from torch import nn
 from functools import partial
 
 from src.paths import CHECKPOINTS_DIR, DATA_DIR
-from src.lifecycles import train, test, save_model, load_modal
+from src.lifecycles import train, test, test_validation, save_model, load_modal
 
 
 # No-op normalization layer
@@ -34,6 +35,7 @@ if __name__ == "__main__":
     train_dataloader, test_dataloader = src.get_dataloder('CIFAR-100', 10, DATA_DIR)
 
     for exp_name, config in experiments.items():
+        print(f'---Running experiment {exp_name}---')
         norm_mod = partial(config['mod'], 128)
 
         # Create the backbone network with 100 classes and the new MyNormLayer normilization layer
@@ -44,7 +46,11 @@ if __name__ == "__main__":
         optimizer = torch.optim.Adam(net.parameters(), lr=LR)
 
         # Train the network on the Adam optimizer, using the training data loader, for 10 epochs
-        train(net, optimizer, train_dataloader, epochs=10)
+        print('---Training---')
+        train_metrics = train(net, optimizer, train_dataloader, epochs=10)
+
+        with open(str(CHECKPOINTS_DIR / f'{exp_name}_train_metrics.pkl'), mode='wb') as f:
+            pkl.dump(train_metrics, f)
 
         # Save the model for use later in the checkpoints directory (src/checkpoints) as 'example_model.pt'
         save_model(net, exp_name)
@@ -53,4 +59,8 @@ if __name__ == "__main__":
         net = load_modal(exp_name)
 
         # Test the model on the test dataloader
-        test(net, test_dataloader)
+        print('---Validation---')
+        val_metrics = test_validation(net, test_dataloader)
+
+        with open(str(CHECKPOINTS_DIR / f'{exp_name}_val_metrics.pkl'), mode='wb') as f:
+            pkl.dump(val_metrics, f)
