@@ -124,7 +124,7 @@ def test(net: torch.nn.Module, testloader, loader_description: str = ''):
     print("Loss on Test Set is", test_loss/(batch_index+1))
     print("Accuracy on Test Set is",test_accuracy)
 
-    metrics['loss'] = test_loss
+    metrics['loss'] = test_loss/(batch_index+1)
     metrics['total_images'] = total_images
     metrics['correct_images'] = correct_images
     metrics['accuracy'] = test_accuracy
