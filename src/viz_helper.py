@@ -1,5 +1,8 @@
+from src.paths import IMAGES_DIR
+
 from typing import List
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 
 def compare_training_stats(
@@ -30,3 +33,8 @@ def compare_training_stats(
     plt.title(title)
 
     return plt
+
+
+def save_plt(plot, filename: str, location: Path = IMAGES_DIR):
+    plot.draw()
+    plot.savefig(f'{str(location / filename)}.png')
