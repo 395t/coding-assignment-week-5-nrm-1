@@ -121,7 +121,7 @@ class ConvPoolCNNC(nn.Module):
 
 
 if __name__ == "__main__":
-    EPOCHS = 1
+    EPOCHS = 20
     BATCH_SIZE = 64
 
     net_cpc_w_norm = ConvPoolCNNC(normalizer=nn.utils.weight_norm)
@@ -148,10 +148,10 @@ if __name__ == "__main__":
         train_dataloader, test_dataloader = src.get_dataloder('CIFAR-100', BATCH_SIZE, DATA_DIR)
 
         # Set up a learning rate and optimizer
-        LR = 0.01
+        LR = 0.001
         optimizer = torch.optim.Adam(net.parameters(), lr=LR)
 
-        # Train the network on the Adam optimizer, using the training data loader, for 3 epochs
+        # Train the network on the Adam optimizer, using the training data loader, for EPOCHS epochs.
         stats = train(net, optimizer, train_dataloader, epochs=EPOCHS, loader_description=config['name'])
 
         # Save the model for testing later
@@ -168,13 +168,13 @@ if __name__ == "__main__":
 
     # For every config, plot the loss across number of epochs
     plt = compare_training_stats(all_stats, labels)
-    save_plt(plt, 'loss_test')
+    save_plt(plt, 'wn_training_loss_w_and_wo_test_bb_and_cnc')
     # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
     plt.show()
 
     # For every config, plot the accuracy across the number of epochs
     plt = compare_training_stats(all_stats, labels, metric_to_compare='accuracy', y_label='accuracy', title='Accuracy vs Epoch')
-    save_plt(plt, 'acc_test')
+    save_plt(plt, 'wn_training_accuracy_w_and_wo_test_bb_and_cnc')
     # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
     plt.show()
 
