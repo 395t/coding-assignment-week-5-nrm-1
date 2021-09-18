@@ -6,7 +6,9 @@ import torch.nn.functional as F
 from functools import partial
 
 from src.paths import CHECKPOINTS_DIR, DATA_DIR
-from src.lifecycles import train, test, save_model, load_modal
+from src.lifecycles import train, test, save_model, load_modal, save_stats, load_stats
+from src.viz_helper import compare_training_stats
+
 
 
 # An example of a custom normalization layer
@@ -16,11 +18,47 @@ class WeightNorm(nn.Module):
         self.layer = layer
 
     def forward(self, x):
+        #TODO implement my own weight norm
         return self.layer(x)
 
 
+class WNResMod(nn.Module):
+    def __init__(self, channels, norm_mod):
+        super(WNResMod, self).__init__()
+        self.stem = nn.Sequential(
+            norm_mod(nn.Conv2d(channels, channels//2, 3, padding="same")),
+            norm_mod(nn.Conv2d(channels//2, channels, 3, padding="same")), nn.ReLU())
+
+    def forward(self, x):
+        return self.stem(x) + x
+
+
+class WNBackbone(nn.Module):
+    def __init__(self, num_classes, norm_mod):
+        super(WNBackbone, self).__init__()
+        # num_channels should be constant
+        num_channels = 128
+        self.init_conv = nn.Sequential(norm_mod(nn.Conv2d(3, 128, 3, padding="same")), nn.ReLU())
+        self.stage1 = nn.Sequential(WNResMod(num_channels, norm_mod), WNResMod(num_channels, norm_mod),
+                                    nn.MaxPool2d(2))
+        self.stage2 = nn.Sequential(WNResMod(num_channels, norm_mod), WNResMod(num_channels, norm_mod),
+                                    nn.MaxPool2d(2))
+        self.stage3 = WNResMod(num_channels, norm_mod)
+        self.pool = nn.AdaptiveMaxPool2d(1)
+        self.logits = norm_mod(nn.Linear(num_channels, num_classes))
+        self.loss = nn.CrossEntropyLoss()
+
+    def forward(self, img_batch, labels_idx):
+        # Batch size must NOT be 1
+        feature_map = self.stage3(self.stage2(self.stage1(self.init_conv(img_batch))))
+        logits = self.logits(torch.squeeze(self.pool(feature_map)))
+        loss = self.loss(logits, labels_idx)
+        pred = torch.argmax(logits, dim=1)
+        return loss, logits, pred
+
+
 class ConvPoolCNNC(nn.Module):
-    def __init__(self, num_classes: int = 100, init_weights: bool = True, normalizer = WeightNorm):
+    def __init__(self, num_classes: int = 100, init_weights: bool = True, normalizer= WeightNorm):
         super(ConvPoolCNNC, self).__init__()
 
         self.conv1_a = normalizer(nn.Conv2d(3, 96, kernel_size=3, padding="same"))
@@ -83,6 +121,9 @@ class ConvPoolCNNC(nn.Module):
 
 
 if __name__ == "__main__":
+    EPOCHS = 3
+    BATCH_SIZE = 64
+
     # The goal of the project is to make your own normalization layer according to your paper.
     # A super simple example that does nothing is MyNormLayer
 
@@ -91,25 +132,53 @@ if __name__ == "__main__":
     # You can add as many parameters as you need to your layer this way.
     norm_mod = partial(WeightNorm, 128)
 
-    # Create the backbone network with 100 classes and the new MyNormLayer normilization layer
+    # Create the backbone network with 100 classes and the new MyNormLayer normalization layer
     #net = src.Backbone(100, norm_mod)
-    net = ConvPoolCNNC(normalizer=nn.utils.weight_norm)
 
-    # Grab the CIFAR-100 dataset, with a batch size of 10, and store it in the Data Directory (src/data)
-    train_dataloader, test_dataloader = src.get_dataloder('CIFAR-100', 10, DATA_DIR)
+    net_cpc_w_norm = ConvPoolCNNC(normalizer=nn.utils.weight_norm)
+    net_cpc_wo_norm = ConvPoolCNNC(normalizer=WeightNorm)
 
-    # Set up a learning rate and optimizer
-    LR = 0.001
-    optimizer = torch.optim.Adam(net.parameters(), lr=LR)
+    # I copied the backbone and modified it slightly to work for my paper (I have to have access to the layer,
+    # others may not need this though).
+    net_bb_w_norm = WNBackbone(100, norm_mod=nn.utils.weight_norm)
+    net_bb_wo_norm = WNBackbone(100, norm_mod=WeightNorm)
 
-    # Train the network on the Adam optimizer, using the training data loader, for 3 epochs
-    train(net, optimizer, train_dataloader, epochs=1)
+    configs = [
+        {'name': 'Conv Pool C with Weight Norm', 'model': net_cpc_w_norm, 'save_model': 'net_cpc_w_norm', 'save_stats': 'net_cpc_w_norm_training'},
+        {'name': 'Conv Pool C with out Weight Norm', 'model': net_cpc_wo_norm, 'save_model': 'net_cpc_wo_norm', 'save_stats': 'net_cpc_wo_norm_training'},
+        {'name': 'Backbone with Weight Norm', 'model': net_bb_w_norm, 'save_model': 'net_bb_w_norm', 'save_stats': 'net_bb_w_norm_training'},
+        {'name': 'Backbone with out Weight Norm', 'model': net_cpc_wo_norm, 'save_model': 'net_bb_wo_norm', 'save_stats': 'net_bb_wo_norm_training'}
 
-    # Save the model for use later in the checkpoints directory (src/checkpoints) as 'example_model.pt'
-    save_model(net, 'weight_norm')
+    ]
 
-    # load the model from the saved file
-    net = load_modal('weight_norm')
+    for config in configs:
 
-    # Test the model on the test dataloader
-    test(net, test_dataloader)
+        net = config['model']
+
+        # Grab the CIFAR-100 dataset, with a batch size of 10, and store it in the Data Directory (src/data)
+        train_dataloader, test_dataloader = src.get_dataloder('CIFAR-100', BATCH_SIZE, DATA_DIR)
+
+        # Set up a learning rate and optimizer
+        LR = 0.01
+        optimizer = torch.optim.Adam(net.parameters(), lr=LR)
+
+        # Train the network on the Adam optimizer, using the training data loader, for 3 epochs
+        stats = train(net, optimizer, train_dataloader, epochs=EPOCHS, loader_description=config['name'])
+
+        save_model(net, config['save_model'])
+        save_stats(stats, config['save_stats'])
+
+    # Models have run, lets plot the stats
+    all_stats = []
+    labels = []
+    for config in configs:
+        all_stats.append(load_stats(config['save_stats']))
+        labels.append(config['name'])
+
+    # For every config, plot the loss across number of epochs
+    plt = compare_training_stats(all_stats, labels)
+    plt.show()
+
+    # For every config, plot the accuracy across the number of epochs
+    plt = compare_training_stats(all_stats, labels, metric_to_compare='accuracy', y_label='accuracy', title='Accuracy vs Epoch')
+    plt.show()
