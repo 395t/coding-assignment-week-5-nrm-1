@@ -14,7 +14,7 @@ from src.viz_helper import compare_training_stats, save_plt
 
 # An example of a custom normalization layer
 class WeightNorm(nn.Module):
-    def __init__(self, layer: nn.Module, weight_name: str = "weight", dim: int = 0):
+    def __init__(self, layer: nn.Module, weight_name: str = "weight", dim: int = 0, divide_w_by_g_in_init:bool = True):
         super(WeightNorm, self).__init__()
 
         self.weight_name = weight_name
@@ -22,9 +22,9 @@ class WeightNorm(nn.Module):
 
         self.layer: nn.Module = layer
 
-        self._setup()
+        self._setup(divide_w_by_g_in_init)
 
-    def _setup(self):
+    def _setup(self, divide_w_by_g_in_init:bool = True):
         # Fetch the weights for the current layer passed in
         # This weight is what we are re-parameterizing
         # In order to do this correctly we have to remove the weight matrix from pytorches internal table of weights
@@ -55,7 +55,10 @@ class WeightNorm(nn.Module):
         # Really, we are not calculating v here.  Instead we are calculating the value v / ||v|| for the initialization
         # although when we call forward, we will use v / ||v||
 
-        v = weight / g
+        if divide_w_by_g_in_init:
+            v = weight / g
+        else:
+            v = weight
 
         # We need to register the new parameters g and v to our model.  Following some best practices we will use
         # the same name as the weight we are re-parameterizing but with a suffix of _g or _v according to the param
@@ -213,7 +216,9 @@ def test_weight_norm(
         dataset: str = "CIFAR-100",
 
         checkpoint: int = -1,
-        save_on_checkpoint: bool = True
+        save_on_checkpoint: bool = True,
+
+        my_norm_divide_w_by_g_in_init: bool = True
     ):
 
     EPOCHS = epochs
@@ -240,6 +245,8 @@ def test_weight_norm(
     NUM_CLASSES = 100
     if dataset == 'STL10':
         NUM_CLASSES = 10
+
+    my_norm = partial(WeightNorm, divide_w_by_g_in_init=my_norm_divide_w_by_g_in_init)
 
     net_cpc_torch_norm = ConvPoolCNNC(normalizer=nn.utils.weight_norm, num_classes=NUM_CLASSES)
     net_cpc_my_norm = ConvPoolCNNC(normalizer=WeightNorm, num_classes=NUM_CLASSES)
@@ -354,7 +361,7 @@ def test_weight_norm(
 
 if __name__ == "__main__":
     test_weight_norm(
-        epochs=3,
+        epochs=40,
         batch_size=64,
         learning_rate=0.001,
         optimizer=torch.optim.Adam,
