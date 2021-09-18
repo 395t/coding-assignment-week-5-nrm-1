@@ -1,7 +1,8 @@
 import torch
-from src.paths import CHECKPOINTS_DIR, DATA_DIR
+from src.paths import CHECKPOINTS_DIR, DATA_DIR, STATS_DIR
 
 from tqdm import tqdm
+import json
 
 """
 Helper functions for things like training, testing, validating, saving models, loading models, etc. (things you
@@ -9,6 +10,14 @@ would do normally in the model testing phase)
 
 Some functions are repurposed from https://github.com/395t/coding-assignment-week-4-opt-1/blob/main/notebooks/MomentumExperiments.ipynb
 """
+
+def save_stats(stats: dict, filename: str):
+    with open(str(STATS_DIR / f'{filename}.json'), 'w') as f:
+        json.dump(stats, f)
+
+def load_stats(filename: str) -> dict:
+    with open(str(STATS_DIR / f'{filename}.json'), 'r') as f:
+        return json.load(f)
 
 def save_model(net: torch.nn.Module, name: str):
     torch.save(net, str(CHECKPOINTS_DIR / f'{name}.pt'))
@@ -22,7 +31,7 @@ def get_device():
     return "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def train(net: torch.nn.Module, optimizer: torch.optim.Optimizer, trainloader, epochs: int = 10):
+def train(net: torch.nn.Module, optimizer: torch.optim.Optimizer, trainloader, epochs: int = 10, loader_description: str = ''):
     device = get_device()
     net.to(device)
     net.train()
@@ -34,7 +43,7 @@ def train(net: torch.nn.Module, optimizer: torch.optim.Optimizer, trainloader, e
         total_images = 0
         training_loss = 0
 
-        for batch_index, (images, labels) in enumerate(tqdm(trainloader)):
+        for batch_index, (images, labels) in enumerate(tqdm(trainloader, desc=loader_description)):
             optimizer.zero_grad()
 
             images, labels = images.to(device), labels.to(device)
@@ -52,7 +61,8 @@ def train(net: torch.nn.Module, optimizer: torch.optim.Optimizer, trainloader, e
         epoch_metrics = {}
         epoch_metrics['correct_images'] = correct_images
         epoch_metrics['total_images'] = total_images
-        epoch_metrics['loss'] = training_loss
+        epoch_metrics['loss'] = training_loss/(batch_index+1)
+        epoch_metrics['accuracy'] = 100.*correct_images/total_images
 
         metrics[f'epoch_{epoch+1}'] = epoch_metrics
 
