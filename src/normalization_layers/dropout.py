@@ -16,7 +16,7 @@ def basic_backbone_example():
     print(f"loss is {loss}, logit shape is {logits.shape}\npredictions {pred}")
 
 
-# An example of a custom normalization layer
+# An example of a custom normalization layer - dropout
 class Dropout(nn.Module):
     def __init__(self, extra_parameter_saved_via_partial):
         super(Dropout, self).__init__()
@@ -28,7 +28,7 @@ class Dropout(nn.Module):
 
     def forward(self, x):
         # more stuff here
-
+        x = nn.Dropout(x)
         # matrix that is the same size as x | d
         # d have zeros and ones, where the 1s are populated p percent of the time
         # only do this if we are training (self.model (parent) .is_training)
