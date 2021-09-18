@@ -212,7 +212,8 @@ def test_weight_norm(
 
         dataset: str = "CIFAR-100",
 
-        checkpoint: int = -1
+        checkpoint: int = -1,
+        save_on_checkpoint: bool = True
     ):
 
     EPOCHS = epochs
@@ -293,14 +294,16 @@ def test_weight_norm(
                 stats = train(net, opt, train_dataloader, starting_epoch=i, epochs=i+checkpoint, loader_description=config['name'])
                 train_stats.update(stats)
 
-                # Save the model for testing later
-                save_model(net, f"EPOCH_{i}_checkpoint_{config['save_model']}")
-                # Save the stats from the training loop for later
-                save_stats(train_stats, f"EPOCH_{i}_checkpoint_{config['save_stats']}")
+                if save_on_checkpoint:
+                    # Save the model for testing later
+                    save_model(net, f"EPOCH_{i}_checkpoint_{config['save_model']}")
+                    # Save the stats from the training loop for later
+                    save_stats(train_stats, f"EPOCH_{i}_checkpoint_{config['save_stats']}")
 
                 if test_models:
                     test_stats[f'epoch_{i+1}'] = test(net, test_dataloader, loader_description=f'TESTING @ epoch {i}: {config["name"]}')
-                    save_stats(train_stats, f"test_EPOCH_{i}_checkpoint_{config['save_stats']}")
+                    if save_on_checkpoint:
+                        save_stats(train_stats, f"test_EPOCH_{i}_checkpoint_{config['save_stats']}")
 
             save_model(net, f"{config['save_model']}")
             # Save the stats from the training loop for later
@@ -367,6 +370,7 @@ if __name__ == "__main__":
         test_loss_fig_title='WNT_testing_loss_my_norm_vs_torch_norm_vs_no_norm',
         test_acc_fig_title='WNT_testing_accuracy_my_norm_vs_torch_norm_vs_no_norm',
         dataset='CIFAR-100',
-        checkpoint=1
+        checkpoint=1,
+        save_on_checkpoint=False
     )
 
