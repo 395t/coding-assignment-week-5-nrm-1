@@ -7,7 +7,7 @@ from functools import partial
 
 from src.paths import CHECKPOINTS_DIR, DATA_DIR
 from src.lifecycles import train, test, save_model, load_modal, save_stats, load_stats
-from src.viz_helper import compare_training_stats
+from src.viz_helper import compare_training_stats, save_plt
 
 
 
@@ -58,7 +58,7 @@ class WNBackbone(nn.Module):
 
 
 class ConvPoolCNNC(nn.Module):
-    def __init__(self, num_classes: int = 100, init_weights: bool = True, normalizer= WeightNorm):
+    def __init__(self, normalizer, num_classes: int = 100, init_weights: bool = True):
         super(ConvPoolCNNC, self).__init__()
 
         self.conv1_a = normalizer(nn.Conv2d(3, 96, kernel_size=3, padding="same"))
@@ -121,38 +121,27 @@ class ConvPoolCNNC(nn.Module):
 
 
 if __name__ == "__main__":
-    EPOCHS = 3
+    EPOCHS = 1
     BATCH_SIZE = 64
 
-    # The goal of the project is to make your own normalization layer according to your paper.
-    # A super simple example that does nothing is MyNormLayer
-
-    # This formats the layer such that you can call norm_mod()
-    # the partial makes sure to pass 128 into the MyNormLayer(128) later on
-    # You can add as many parameters as you need to your layer this way.
-    norm_mod = partial(WeightNorm, 128)
-
-    # Create the backbone network with 100 classes and the new MyNormLayer normalization layer
-    #net = src.Backbone(100, norm_mod)
-
     net_cpc_w_norm = ConvPoolCNNC(normalizer=nn.utils.weight_norm)
-    net_cpc_wo_norm = ConvPoolCNNC(normalizer=WeightNorm)
+    net_cpc_wo_norm = ConvPoolCNNC(normalizer=nn.Sequential)
 
     # I copied the backbone and modified it slightly to work for my paper (I have to have access to the layer,
     # others may not need this though).
     net_bb_w_norm = WNBackbone(100, norm_mod=nn.utils.weight_norm)
-    net_bb_wo_norm = WNBackbone(100, norm_mod=WeightNorm)
+    net_bb_wo_norm = WNBackbone(100, norm_mod=nn.Sequential)
 
+    # Different models with some parameters I want to compare against
     configs = [
         {'name': 'Conv Pool C with Weight Norm', 'model': net_cpc_w_norm, 'save_model': 'net_cpc_w_norm', 'save_stats': 'net_cpc_w_norm_training'},
         {'name': 'Conv Pool C with out Weight Norm', 'model': net_cpc_wo_norm, 'save_model': 'net_cpc_wo_norm', 'save_stats': 'net_cpc_wo_norm_training'},
         {'name': 'Backbone with Weight Norm', 'model': net_bb_w_norm, 'save_model': 'net_bb_w_norm', 'save_stats': 'net_bb_w_norm_training'},
-        {'name': 'Backbone with out Weight Norm', 'model': net_cpc_wo_norm, 'save_model': 'net_bb_wo_norm', 'save_stats': 'net_bb_wo_norm_training'}
-
+        {'name': 'Backbone with out Weight Norm', 'model': net_bb_wo_norm, 'save_model': 'net_bb_wo_norm', 'save_stats': 'net_bb_wo_norm_training'}
     ]
 
+    # Train each model
     for config in configs:
-
         net = config['model']
 
         # Grab the CIFAR-100 dataset, with a batch size of 10, and store it in the Data Directory (src/data)
@@ -165,7 +154,9 @@ if __name__ == "__main__":
         # Train the network on the Adam optimizer, using the training data loader, for 3 epochs
         stats = train(net, optimizer, train_dataloader, epochs=EPOCHS, loader_description=config['name'])
 
+        # Save the model for testing later
         save_model(net, config['save_model'])
+        # Save the stats from the training loop for later
         save_stats(stats, config['save_stats'])
 
     # Models have run, lets plot the stats
@@ -177,8 +168,14 @@ if __name__ == "__main__":
 
     # For every config, plot the loss across number of epochs
     plt = compare_training_stats(all_stats, labels)
+    save_plt(plt, 'loss_test')
+    # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
     plt.show()
 
     # For every config, plot the accuracy across the number of epochs
     plt = compare_training_stats(all_stats, labels, metric_to_compare='accuracy', y_label='accuracy', title='Accuracy vs Epoch')
+    save_plt(plt, 'acc_test')
+    # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
     plt.show()
+
+
