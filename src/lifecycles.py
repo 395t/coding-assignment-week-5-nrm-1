@@ -31,14 +31,14 @@ def get_device():
     return "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def train(net: torch.nn.Module, optimizer: torch.optim.Optimizer, trainloader, epochs: int = 10, loader_description: str = ''):
+def train(net: torch.nn.Module, optimizer: torch.optim.Optimizer, trainloader, epochs: int = 10, starting_epoch: int = 0, loader_description: str = ''):
     device = get_device()
     net.to(device)
     net.train()
 
     metrics = {}
 
-    for epoch in range(epochs):
+    for epoch in range(starting_epoch, epochs):
         correct_images = 0
         total_images = 0
         training_loss = 0
@@ -103,7 +103,7 @@ def test_validation(net: torch.nn.Module, validloader):
 
 
 
-def test(net: torch.nn.Module, testloader):
+def test(net: torch.nn.Module, testloader, loader_description: str = ''):
     device = get_device()
     net.to(device)
 
@@ -114,7 +114,7 @@ def test(net: torch.nn.Module, testloader):
     correct_images = 0
     net.eval()
     with torch.no_grad():
-        for batch_index, (images, labels) in enumerate(tqdm(testloader)):
+        for batch_index, (images, labels) in enumerate(tqdm(testloader, desc=loader_description)):
             images, labels = images.to(device), labels.to(device)
             loss, logits, predicted = net(images, labels)
             test_loss += loss.item()
@@ -127,6 +127,7 @@ def test(net: torch.nn.Module, testloader):
     metrics['loss'] = test_loss
     metrics['total_images'] = total_images
     metrics['correct_images'] = correct_images
+    metrics['accuracy'] = test_accuracy
 
     return metrics
 

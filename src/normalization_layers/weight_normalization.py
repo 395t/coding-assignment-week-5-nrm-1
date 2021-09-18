@@ -201,10 +201,18 @@ def test_weight_norm(
         include_no_weight_norm: bool = True,
         include_pytorch_weight_norm: bool = True,
 
+        train_models: bool = True,
+        test_models: bool = True,
+
         loss_fig_title: str = None,
         acc_fig_title: str = None,
 
-        dataset: str = "CIFAR-100"
+        test_loss_fig_title: str = None,
+        test_acc_fig_title: str = None,
+
+        dataset: str = "CIFAR-100",
+
+        checkpoint: int = -1
     ):
 
     EPOCHS = epochs
@@ -215,9 +223,18 @@ def test_weight_norm(
         loss_fig_title = f'WNT_training_loss'
     if acc_fig_title is None:
         acc_fig_title = f'WNT_training_acc'
+    if test_loss_fig_title is None:
+        test_loss_fig_title = f'WNT_test_loss'
+    if test_acc_fig_title is None:
+        test_acc_fig_title = f'WNT_test_acc'
+
+    if checkpoint == -1:
+        checkpoint = EPOCHS
 
     loss_fig_title += f'_{learning_rate}|{optim_name}|{dataset}'
     acc_fig_title += f'_{learning_rate}|{optim_name}{dataset}'
+    test_loss_fig_title += f'_{learning_rate}|{optim_name}|{dataset}'
+    test_acc_fig_title += f'_{learning_rate}|{optim_name}|{dataset}'
 
     NUM_CLASSES = 100
     if dataset == 'STL10':
@@ -257,48 +274,84 @@ def test_weight_norm(
             configs.append({'name': f'Conv Pool C with My Weight Norm LR {learning_rate} USING {optim_name} ON {dataset}', 'label': 'CPC Mine', 'model': net_cpc_my_norm, 'save_model': f'WN_cpc_my_norm@{learning_rate}|{dataset}', 'save_stats': f'WN_cpc_my_norm_training@{learning_rate}|{optim_name}|{dataset}', 'LR': learning_rate})
 
 
-    # # Train each model
-    # for config in configs:
-    #     net = config['model']
-    #
-    #     # Grab the CIFAR-100 dataset, with a batch size of 10, and store it in the Data Directory (src/data)
-    #     train_dataloader, test_dataloader = src.get_dataloder(dataset, BATCH_SIZE, DATA_DIR)
-    #
-    #     # Set up a learning rate and optimizer
-    #     opt = optimizer(net.parameters(), lr=config['LR'])
-    #
-    #     # Train the network on the optimizer, using the training data loader, for EPOCHS epochs.
-    #     stats = train(net, opt, train_dataloader, epochs=EPOCHS, loader_description=config['name'])
-    #
-    #     # Save the model for testing later
-    #     save_model(net, config['save_model'])
-    #     # Save the stats from the training loop for later
-    #     save_stats(stats, config['save_stats'])
+    # Train each model
+    if train_models:
+        for config in configs:
+            test_stats = {}
+            train_stats = {}
+
+            net = config['model']
+
+            # Grab the CIFAR-100 dataset, with a batch size of 10, and store it in the Data Directory (src/data)
+            train_dataloader, test_dataloader = src.get_dataloder(dataset, BATCH_SIZE, DATA_DIR)
+
+            # Set up a learning rate and optimizer
+            opt = optimizer(net.parameters(), lr=config['LR'])
+
+            for i in range(0, EPOCHS, checkpoint):
+                # Train the network on the optimizer, using the training data loader, for EPOCHS epochs.
+                stats = train(net, opt, train_dataloader, starting_epoch=i, epochs=i+checkpoint, loader_description=config['name'])
+                train_stats.update(stats)
+
+                # Save the model for testing later
+                save_model(net, f"EPOCH_{i}_checkpoint_{config['save_model']}")
+                # Save the stats from the training loop for later
+                save_stats(train_stats, f"EPOCH_{i}_checkpoint_{config['save_stats']}")
+
+                if test_models:
+                    test_stats[f'epoch_{i+1}'] = test(net, test_dataloader, loader_description=f'TESTING @ epoch {i}: {config["name"]}')
+                    save_stats(train_stats, f"test_EPOCH_{i}_checkpoint_{config['save_stats']}")
+
+            save_model(net, f"{config['save_model']}")
+            # Save the stats from the training loop for later
+            save_stats(train_stats, f"{config['save_stats']}")
+
+            if test_models:
+                test_stats[f'epoch_{EPOCHS + 1}'] = test(net, test_dataloader, loader_description=f'TESTING: {config["name"]}')
+
+                save_stats(test_stats, f'test_{config["save_stats"]}')
 
     # Models have run, lets plot the stats
-    all_stats = []
+    train_stats = []
+    test_stats = []
     labels = []
     for config in configs:
-        all_stats.append(load_stats(config['save_stats']))
+        train_stats.append(load_stats(config['save_stats']))
+        test_stats.append(load_stats(f'test_{config["save_stats"]}'))
         labels.append(config['label'])
 
-    # For every config, plot the loss across number of epochs
-    plt = compare_training_stats(all_stats, labels)
-    save_plt(plt, loss_fig_title)
-    # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
-    plt.show()
 
-    # For every config, plot the accuracy across the number of epochs
-    plt = compare_training_stats(all_stats, labels, metric_to_compare='accuracy', y_label='accuracy',
-                                 title='Accuracy vs Epoch', legend_loc='lower right')
-    save_plt(plt, acc_fig_title)
-    # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
-    plt.show()
+    if len(train_stats) and train_models:
+        # For every config, plot the loss across number of epochs
+        plt = compare_training_stats(train_stats, labels)
+        save_plt(plt, loss_fig_title)
+        # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
+        plt.show()
+
+        # For every config, plot the accuracy across the number of epochs
+        plt = compare_training_stats(train_stats, labels, metric_to_compare='accuracy', y_label='accuracy',
+                                     title='Accuracy vs Epoch', legend_loc='lower right')
+        save_plt(plt, acc_fig_title)
+        # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
+        plt.show()
+
+
+    if len(test_stats) > 0 and test_models:
+        plt = compare_training_stats(test_stats, labels, title="Test Loss vs Checkpoint")
+        save_plt(plt, test_loss_fig_title)
+        plt.show()
+
+        plt = compare_training_stats(test_stats, labels, metric_to_compare='accuracy', y_label='accuracy',
+                                     title='Test Accuracy vs Checkpoint', legend_loc='lower right')
+        save_plt(plt, test_acc_fig_title)
+        plt.show()
+
+
 
 
 if __name__ == "__main__":
     test_weight_norm(
-        epochs=30,
+        epochs=3,
         batch_size=64,
         learning_rate=0.001,
         optimizer=torch.optim.Adam,
@@ -307,8 +360,13 @@ if __name__ == "__main__":
         include_my_weight_norm=True,
         include_no_weight_norm=True,
         include_pytorch_weight_norm=True,
+        train_models=True,
+        test_models=True,
         loss_fig_title='WNT_training_loss_my_norm_vs_torch_norm_vs_no_norm',
         acc_fig_title='WNT_training_accuracy_my_norm_vs_torch_norm_vs_no_norm',
-        dataset='CIFAR-100'
+        test_loss_fig_title='WNT_testing_loss_my_norm_vs_torch_norm_vs_no_norm',
+        test_acc_fig_title='WNT_testing_accuracy_my_norm_vs_torch_norm_vs_no_norm',
+        dataset='CIFAR-100',
+        checkpoint=1
     )
 
