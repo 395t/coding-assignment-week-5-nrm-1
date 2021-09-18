@@ -257,23 +257,23 @@ def test_weight_norm(
             configs.append({'name': f'Conv Pool C with My Weight Norm LR {learning_rate} USING {optim_name} ON {dataset}', 'label': 'CPC Mine', 'model': net_cpc_my_norm, 'save_model': f'WN_cpc_my_norm@{learning_rate}|{dataset}', 'save_stats': f'WN_cpc_my_norm_training@{learning_rate}|{optim_name}|{dataset}', 'LR': learning_rate})
 
 
-    # Train each model
-    for config in configs:
-        net = config['model']
-
-        # Grab the CIFAR-100 dataset, with a batch size of 10, and store it in the Data Directory (src/data)
-        train_dataloader, test_dataloader = src.get_dataloder(dataset, BATCH_SIZE, DATA_DIR)
-
-        # Set up a learning rate and optimizer
-        opt = optimizer(net.parameters(), lr=config['LR'])
-
-        # Train the network on the optimizer, using the training data loader, for EPOCHS epochs.
-        stats = train(net, opt, train_dataloader, epochs=EPOCHS, loader_description=config['name'])
-
-        # Save the model for testing later
-        save_model(net, config['save_model'])
-        # Save the stats from the training loop for later
-        save_stats(stats, config['save_stats'])
+    # # Train each model
+    # for config in configs:
+    #     net = config['model']
+    #
+    #     # Grab the CIFAR-100 dataset, with a batch size of 10, and store it in the Data Directory (src/data)
+    #     train_dataloader, test_dataloader = src.get_dataloder(dataset, BATCH_SIZE, DATA_DIR)
+    #
+    #     # Set up a learning rate and optimizer
+    #     opt = optimizer(net.parameters(), lr=config['LR'])
+    #
+    #     # Train the network on the optimizer, using the training data loader, for EPOCHS epochs.
+    #     stats = train(net, opt, train_dataloader, epochs=EPOCHS, loader_description=config['name'])
+    #
+    #     # Save the model for testing later
+    #     save_model(net, config['save_model'])
+    #     # Save the stats from the training loop for later
+    #     save_stats(stats, config['save_stats'])
 
     # Models have run, lets plot the stats
     all_stats = []
@@ -290,7 +290,7 @@ def test_weight_norm(
 
     # For every config, plot the accuracy across the number of epochs
     plt = compare_training_stats(all_stats, labels, metric_to_compare='accuracy', y_label='accuracy',
-                                 title='Accuracy vs Epoch')
+                                 title='Accuracy vs Epoch', legend_loc='lower right')
     save_plt(plt, acc_fig_title)
     # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
     plt.show()
