@@ -23,9 +23,10 @@ if __name__ == "__main__":
         # Experiments to reproduce from batch norm paper
         experiments = {
             'baseline': {'mod': MyNormLayer, 'lr': 0.001},
-            # 'batch_norm': {'mod': nn.BatchNorm2d, 'lr': 0.001},
-            # 'batch_norm_5x': {'mod': nn.BatchNorm2d, 'lr': 0.005},
-            # 'batch_norm_30x': {'mod': nn.BatchNorm2d, 'lr': 0.030},
+            'batch_norm': {'mod': nn.BatchNorm2d, 'lr': 0.001},
+            'batch_norm_3x': {'mod': nn.BatchNorm2d, 'lr': 0.003},
+            'batch_norm_5x': {'mod': nn.BatchNorm2d, 'lr': 0.005},
+            'batch_norm_30x': {'mod': nn.BatchNorm2d, 'lr': 0.030},
         }
         # Grab the dataset, with a batch size of 10, and store it in the Data Directory (src/data)
         train_dataloader, test_dataloader = src.get_dataloder(dataset, 10, DATA_DIR)
@@ -46,7 +47,7 @@ if __name__ == "__main__":
 
             # can use below for quick test
             # train_metrics = train(net, optimizer, list(train_dataloader)[:1], epochs=2)
-            train_metrics = train(net, optimizer, train_dataloader, epochs=10)
+            train_metrics = train(net, optimizer, train_dataloader, epochs=20)
 
             save_path = f'{dataset}_{exp_name}_train_metrics'
             save_stats(train_metrics, save_path)
@@ -90,3 +91,8 @@ if __name__ == "__main__":
             exp = f'{dataset}_{exp_name}'
             test_acc[exp] = stats['accuracy']
         save_stats(test_acc, f'{dataset}_test_acc')
+
+"""
+{"TINY_baseline": 0.53, "TINY_batch_norm": 0.57, "TINY_batch_norm_3x": 1.08, "TINY_batch_norm_5x": 0.95, "TINY_batch_norm_30x": 10.59}
+{"STL10_baseline": 59.975, "STL10_batch_norm": 62.175, "STL10_batch_norm_3x": 56.8875, "STL10_batch_norm_5x": 60.1, "STL10_batch_norm_30x": 40.5875}
+"""
