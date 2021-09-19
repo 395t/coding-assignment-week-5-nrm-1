@@ -376,10 +376,14 @@ def test_weight_norm(
 
 
 if __name__ == "__main__":
+
     for lr in (0.001, 0.003):
         for dataset in ('TINY', 'STL10', 'CIFAR-100'):
+            # Tiny isn't really all that tiny...
+            EPOCHS = 10 if dataset == 'TINY' else 20
+
             test_weight_norm(
-                epochs=10,
+                epochs=EPOCHS,
                 batch_size=64,
                 learning_rate=lr,
                 optimizer=torch.optim.Adam,
