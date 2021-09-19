@@ -11,8 +11,7 @@ from src.lifecycles import train, test, save_model, load_modal, save_stats, load
 from src.viz_helper import compare_training_stats, save_plt
 
 
-
-# An example of a custom normalization layer
+# Custom Implementation of Weight Normalization
 class WeightNorm(nn.Module):
     def __init__(self, layer: nn.Module, weight_name: str = "weight", dim: int = 0, divide_w_by_g_in_init:bool = True):
         super(WeightNorm, self).__init__()
@@ -58,6 +57,9 @@ class WeightNorm(nn.Module):
         if divide_w_by_g_in_init:
             v = weight / g
         else:
+            # Pytorch's implementation does not divide by g (so this version is closer to what people use in production)
+            # I think this is because g is just a scalar and can be adjusted for later in the training process.
+            # However, its a cool experiment to see which does better.
             v = weight
 
         # We need to register the new parameters g and v to our model.  Following some best practices we will use
@@ -65,6 +67,7 @@ class WeightNorm(nn.Module):
         self.layer.register_parameter(f'{self.weight_name}_g', nn.Parameter(g.data))  # g.data to avoid references to w
         self.layer.register_parameter(f'{self.weight_name}_v', nn.Parameter(v.data))
 
+        # Update the layer params.  This probably is unnecessary since every forward call will have this called anyway
         self.set_W()
 
 
@@ -203,6 +206,7 @@ def test_weight_norm(
         include_my_weight_norm: bool = True,
         include_no_weight_norm: bool = True,
         include_pytorch_weight_norm: bool = True,
+        include_no_divide_by_g: bool = False,
 
         train_models: bool = True,
         test_models: bool = True,
@@ -218,7 +222,6 @@ def test_weight_norm(
         checkpoint: int = -1,
         save_on_checkpoint: bool = True,
 
-        my_norm_divide_w_by_g_in_init: bool = True
     ):
 
     EPOCHS = epochs
@@ -246,16 +249,20 @@ def test_weight_norm(
     if dataset == 'STL10':
         NUM_CLASSES = 10
 
-    my_norm = partial(WeightNorm, divide_w_by_g_in_init=my_norm_divide_w_by_g_in_init)
+    my_norm_w_g_norm = partial(WeightNorm, divide_w_by_g_in_init=True)
+    my_norm_wo_g_norm = partial(WeightNorm, divide_w_by_g_in_init=False)
+
 
     net_cpc_torch_norm = ConvPoolCNNC(normalizer=nn.utils.weight_norm, num_classes=NUM_CLASSES)
-    net_cpc_my_norm = ConvPoolCNNC(normalizer=WeightNorm, num_classes=NUM_CLASSES)
+    net_cpc_my_norm = ConvPoolCNNC(normalizer=my_norm_w_g_norm, num_classes=NUM_CLASSES)
+    net_cpc_my_norm_wo_g_norm = ConvPoolCNNC(normalizer=my_norm_wo_g_norm, num_classes=NUM_CLASSES)
     net_cpc_no_norm = ConvPoolCNNC(normalizer=nn.Sequential, num_classes=NUM_CLASSES)
 
     # I copied the backbone and modified it slightly to work for my paper (I have to have access to the layer,
     # others may not need this though).
     net_bb_torch_norm = WNBackbone(NUM_CLASSES, norm_mod=nn.utils.weight_norm)
-    net_bb_my_norm = WNBackbone(NUM_CLASSES, norm_mod=WeightNorm)
+    net_bb_my_norm = WNBackbone(NUM_CLASSES, norm_mod=my_norm_w_g_norm)
+    net_bb_my_norm_wo_g_norm = WNBackbone(NUM_CLASSES, norm_mod=my_norm_wo_g_norm)
     net_bb_no_norm = WNBackbone(NUM_CLASSES, norm_mod=nn.Sequential)
 
     # Different models with some parameters I want to compare against
@@ -271,6 +278,10 @@ def test_weight_norm(
         if include_my_weight_norm:
             configs.append({'name': f'Backbone with My Weight Norm LR {learning_rate} USING {optim_name} ON {dataset}', 'label': 'BackBone Mine', 'model': net_bb_my_norm, 'save_model': f'WN_bb_my_norm@{learning_rate}|{optim_name}|{dataset}', 'save_stats': f'WN_bb_my_norm_training@{learning_rate}|{optim_name}|{dataset}', 'LR': learning_rate})
 
+        if include_no_divide_by_g:
+            configs.append({'name': f'Backbone with My Weight NGN Norm LR {learning_rate} USING {optim_name} ON {dataset}', 'label': 'BackBone Mine NGN', 'model': net_bb_my_norm_wo_g_norm, 'save_model': f'WN_bb_my_norm_no_gn@{learning_rate}|{optim_name}|{dataset}', 'save_stats': f'WN_bb_my_norm_no_gn_training@{learning_rate}|{optim_name}|{dataset}', 'LR': learning_rate})
+
+
     if use_cnc:
         if include_pytorch_weight_norm:
             configs.append({'name': f'Conv Pool C with Torch Weight Norm LR {learning_rate} USING {optim_name} ON {dataset}', 'label': 'CPC Torch', 'model': net_cpc_torch_norm, 'save_model': f'WN_cpc_torch_norm@{learning_rate}|{optim_name}|{dataset}', 'save_stats': f'WN_cpc_torch_norm_training@{learning_rate}|{optim_name}|{dataset}', 'LR': learning_rate})
@@ -280,6 +291,9 @@ def test_weight_norm(
 
         if include_my_weight_norm:
             configs.append({'name': f'Conv Pool C with My Weight Norm LR {learning_rate} USING {optim_name} ON {dataset}', 'label': 'CPC Mine', 'model': net_cpc_my_norm, 'save_model': f'WN_cpc_my_norm@{learning_rate}|{dataset}', 'save_stats': f'WN_cpc_my_norm_training@{learning_rate}|{optim_name}|{dataset}', 'LR': learning_rate})
+
+        if include_no_divide_by_g:
+            configs.append({'name': f'Conv Pool C with My Weight Norm NGN LR {learning_rate} USING {optim_name} ON {dataset}', 'label': 'CPC Mine NGN', 'model': net_cpc_my_norm_wo_g_norm, 'save_model': f'WN_cpc_my_norm_no_gn@{learning_rate}|{dataset}', 'save_stats': f'WN_cpc_my_norm_no_gn_training@{learning_rate}|{optim_name}|{dataset}', 'LR': learning_rate})
 
 
     # Train each model
@@ -361,23 +375,28 @@ def test_weight_norm(
 
 if __name__ == "__main__":
     test_weight_norm(
-        epochs=40,
+        epochs=20,
         batch_size=64,
         learning_rate=0.001,
         optimizer=torch.optim.Adam,
+
         use_bb=True,
         use_cnc=True,
         include_my_weight_norm=True,
-        include_no_weight_norm=True,
+        include_no_weight_norm=False,
         include_pytorch_weight_norm=True,
+        include_no_divide_by_g=True,
+
         train_models=True,
         test_models=True,
-        loss_fig_title='WNT_training_loss_my_norm_vs_torch_norm_vs_no_norm',
-        acc_fig_title='WNT_training_accuracy_my_norm_vs_torch_norm_vs_no_norm',
-        test_loss_fig_title='WNT_testing_loss_my_norm_vs_torch_norm_vs_no_norm',
-        test_acc_fig_title='WNT_testing_accuracy_my_norm_vs_torch_norm_vs_no_norm',
+
+        loss_fig_title='WNT_training_loss_ngn_vs_gn',
+        acc_fig_title='WNT_training_accuracy_ngn_vs_gn',
+        test_loss_fig_title='WNT_testing_loss_ngn_vs_gn',
+        test_acc_fig_title='WNT_testing_accuracy_ngn_vs_gn',
+
         dataset='CIFAR-100',
         checkpoint=1,
-        save_on_checkpoint=False
+        save_on_checkpoint=False,
     )
 
