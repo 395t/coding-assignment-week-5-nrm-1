@@ -93,7 +93,7 @@ def test_validation(net: torch.nn.Module, validloader):
             correct_images += predicted.eq(labels).sum().item()
     val_accuracy = 100.*correct_images/total_images
 
-    metrics['loss'] = val_loss
+    metrics['loss'] = val_loss/(batch_index+1)
     metrics['total_images'] = total_images
     metrics['correct_images'] = correct_images
     metrics['accuracy'] = val_accuracy

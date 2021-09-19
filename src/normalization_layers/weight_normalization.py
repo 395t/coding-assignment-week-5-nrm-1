@@ -248,6 +248,8 @@ def test_weight_norm(
     NUM_CLASSES = 100
     if dataset == 'STL10':
         NUM_CLASSES = 10
+    if dataset == 'TINY':
+        NUM_CLASSES = 200
 
     my_norm_w_g_norm = partial(WeightNorm, divide_w_by_g_in_init=True)
     my_norm_wo_g_norm = partial(WeightNorm, divide_w_by_g_in_init=False)
@@ -374,29 +376,32 @@ def test_weight_norm(
 
 
 if __name__ == "__main__":
-    test_weight_norm(
-        epochs=20,
-        batch_size=64,
-        learning_rate=0.001,
-        optimizer=torch.optim.Adam,
+    for lr in (0.001, 0.003):
+        for dataset in ('TINY', 'STL10', 'CIFAR-100'):
+            test_weight_norm(
+                epochs=10,
+                batch_size=64,
+                learning_rate=lr,
+                optimizer=torch.optim.Adam,
 
-        use_bb=True,
-        use_cnc=True,
-        include_my_weight_norm=True,
-        include_no_weight_norm=False,
-        include_pytorch_weight_norm=True,
-        include_no_divide_by_g=True,
+                use_bb=True,
+                use_cnc=False,
+                include_my_weight_norm=True,
+                include_no_weight_norm=False,
+                include_pytorch_weight_norm=False,
+                include_no_divide_by_g=False,
 
-        train_models=True,
-        test_models=True,
+                train_models=True,
+                test_models=True,
 
-        loss_fig_title='WNT_training_loss_ngn_vs_gn',
-        acc_fig_title='WNT_training_accuracy_ngn_vs_gn',
-        test_loss_fig_title='WNT_testing_loss_ngn_vs_gn',
-        test_acc_fig_title='WNT_testing_accuracy_ngn_vs_gn',
+                loss_fig_title=f'WNT_training_loss_on_{dataset}@{lr}',
+                acc_fig_title=f'WNT_training_acc_on_{dataset}@{lr}',
+                test_loss_fig_title=f'WNT_test_loss_on_{dataset}@{lr}',
+                test_acc_fig_title=f'WNT_test_acc_on_{dataset}@{lr}',
 
-        dataset='CIFAR-100',
-        checkpoint=1,
-        save_on_checkpoint=False,
-    )
+                dataset=dataset,
+                checkpoint=1,
+                save_on_checkpoint=False,
+            )
+
 
