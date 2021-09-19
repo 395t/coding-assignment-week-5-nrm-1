@@ -33,7 +33,7 @@ def get_dataloder(name, batch_size, storage_path):
 
 
 def load_validation_tinynet(train_set: datasets.ImageFolder) -> datasets.ImageFolder:
-    # TinyImage net is annotated the same way for train and val folders.
+    # TinyImage net is NOT annotated the same way for train and val folders.
     # Train has each class separated into subfolders, however, val has each class annotated in a separate text file
     # Without this helper function, loading the validation folder as an imagefolder will cause all examples to have
     # a target class of 0
