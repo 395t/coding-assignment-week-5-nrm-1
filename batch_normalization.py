@@ -19,8 +19,6 @@ class MyNormLayer(nn.Module):
 
 
 if __name__ == "__main__":
-
-    # todo: add third dataset
     for dataset, num_classes in (('STL10', 100), ('TINY', 200)):
         # Experiments to reproduce from batch norm paper
         experiments = {
