@@ -58,7 +58,7 @@ def load_validation_tinynet(train_set: datasets.ImageFolder) -> datasets.ImageFo
 
         # The train set will have a mapping of "class name" to "idx".
         # IMPORTANT: use whats in the trainset not the order given from tinynets wnids.txt (they will be out of sync)
-        target_idx = train_set.classes.index(target_class)
+        target_idx = train_set.class_to_idx[target_class]
         targets.append(target_idx)
 
     # Load the validation image folder
@@ -66,4 +66,13 @@ def load_validation_tinynet(train_set: datasets.ImageFolder) -> datasets.ImageFo
 
     # Overwrite the bad targets with our new ones.
     validation_set.targets = targets
+
+    # We have to overwrite some class look ups and class arrays to match what we are really representing in the dataset
+    validation_set.class_to_idx = train_set.class_to_idx
+    validation_set.classes = train_set.classes
+
+    # Each image has a path and a target, we have to overwrite the bad targets and keep the same path
+    for idx, target in enumerate(targets):
+        validation_set.samples[idx] = (validation_set.samples[idx][0], target)
+
     return validation_set

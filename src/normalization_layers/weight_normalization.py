@@ -379,7 +379,7 @@ if __name__ == "__main__":
     for lr in (0.001, 0.003):
         for dataset in ('TINY', 'STL10', 'CIFAR-100'):
             test_weight_norm(
-                epochs=20,
+                epochs=10,
                 batch_size=64,
                 learning_rate=lr,
                 optimizer=torch.optim.Adam,
