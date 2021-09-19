@@ -3,7 +3,7 @@ import torchvision.transforms as T
 from torch.utils import data
 from torchvision import datasets
 from src.paths import DATA_DIR
-import os
+import os, re
 from tiny_img import download_tinyImg200, load_tiny_image
 
 __all__ = ["get_dataloder"]
@@ -64,6 +64,18 @@ def load_validation_tinynet(train_set: datasets.ImageFolder) -> datasets.ImageFo
     # Load the validation image folder
     validation_set = datasets.ImageFolder(str(DATA_DIR / 'tiny-imagenet-200/val'), transform=T.ToTensor())
 
+    # The image folder will sort all the files alphebetically, this means val_01, val_02, and val_10 will be
+    # [val_01, val_10, val_02]
+    # we this is not the order seen in the validation annotation file.  So we have to reorder these arrays
+    # using a sorter that looks at the numerical value in the file name.
+    def sorter(item):
+        return int(re.sub('\D', '', item))
+
+    # samples & imgs need to be resorted to match the target array
+    validation_set.samples = sorted(validation_set.samples, key=lambda x : sorter(x[0].split("/")[-1]))
+    validation_set.imgs = sorted(validation_set.imgs, key=lambda x : sorter(x[0].split("/")[-1]))
+
+
     # Overwrite the bad targets with our new ones.
     validation_set.targets = targets
 
@@ -74,5 +86,6 @@ def load_validation_tinynet(train_set: datasets.ImageFolder) -> datasets.ImageFo
     # Each image has a path and a target, we have to overwrite the bad targets and keep the same path
     for idx, target in enumerate(targets):
         validation_set.samples[idx] = (validation_set.samples[idx][0], target)
+        validation_set.imgs[idx] = (validation_set.imgs[idx][0], target)
 
     return validation_set
