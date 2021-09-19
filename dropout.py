@@ -35,7 +35,7 @@ class Dropout(nn.Module):
 
 
 if __name__ == "__main__":
-    TRAIN = True
+    TRAIN = False
     EPOCHS = 15
     BATCHS_SIZE = 64
 
@@ -66,19 +66,19 @@ if __name__ == "__main__":
     configs = [
         # no dropout
         {'name': 'No dropout, LR: 0.001', 'label': "NDO 0.001", 'model': net_no_dropout_lr1, 'save_model': 'net_no_dropout_lr1', 'save_stats': 'net_no_dropout_training_lr1', 'LR': 0.001},
-        {'name': 'No dropout, LR: 0.01', 'label': "NDO 0.01", 'model': net_no_dropout_lr2, 'save_model': 'net_no_dropout_lr2', 'save_stats': 'net_no_dropout_training_lr2', 'LR': 0.01},
+        # {'name': 'No dropout, LR: 0.01', 'label': "NDO 0.01", 'model': net_no_dropout_lr2, 'save_model': 'net_no_dropout_lr2', 'save_stats': 'net_no_dropout_training_lr2', 'LR': 0.01},
         
         # dropout p = 0.25
         {'name': 'Dropoiut of 25%, LR: 0.001', 'label': "DO 25% .001", 'model': net_dropout_25_lr1, 'save_model': 'net_dropout_25_lr1', 'save_stats': 'net_dropout_25_training_lr1', 'LR': 0.001},
-        {'name': 'Dropoiut of 25%, LR: 0.01',  'label': "DO 25% .01", 'model': net_dropout_25_lr2, 'save_model': 'net_dropout_25_lr2', 'save_stats': 'net_dropout_25_training_lr2', 'LR': 0.01},
+        # {'name': 'Dropoiut of 25%, LR: 0.01',  'label': "DO 25% .01", 'model': net_dropout_25_lr2, 'save_model': 'net_dropout_25_lr2', 'save_stats': 'net_dropout_25_training_lr2', 'LR': 0.01},
 
         # dropout p = 0.50
         {'name': 'Dropout of 50%, LR: 0.001', 'label': "DO 50% .001", 'model': net_dropout_50_lr1, 'save_model': 'net_dropout_50_lr1', 'save_stats': 'net_dropout_50_lr1', 'LR': 0.001},
-        {'name': 'Dropout of 50%, LR: 0.01',  'label': "DO 50% .01", 'model': net_dropout_50_lr2, 'save_model': 'net_dropout_50_lr2', 'save_stats': 'net_dropout_50_lr2', 'LR': 0.01},
+        # {'name': 'Dropout of 50%, LR: 0.01',  'label': "DO 50% .01", 'model': net_dropout_50_lr2, 'save_model': 'net_dropout_50_lr2', 'save_stats': 'net_dropout_50_lr2', 'LR': 0.01},
         
         # dropout p = 0.75
         {'name': 'Dropout of 75%, LR: 0.001',  'label': "DO 75% .001", 'model': net_dropout_75_lr1, 'save_model': 'net_dropout_75_lr1', 'save_stats': 'net_dropout_75_lr1', 'LR': 0.001},
-        {'name': 'Dropout of 75%, LR: 0.01',  'label': "DO 75% .01", 'model': net_dropout_75_lr2, 'save_model': 'net_dropout_75_lr2', 'save_stats': 'net_dropout_75_lr2', 'LR': 0.01}
+        # {'name': 'Dropout of 75%, LR: 0.01',  'label': "DO 75% .01", 'model': net_dropout_75_lr2, 'save_model': 'net_dropout_75_lr2', 'save_stats': 'net_dropout_75_lr2', 'LR': 0.01}
     ]
 
     # Train the network on the Adam optimizer, using the training data loader, for 3 epochs
@@ -97,14 +97,14 @@ if __name__ == "__main__":
             stats = train(net, optimizer, train_dataloader, epochs=EPOCHS, loader_description=config['name'])
 
             # Save the model for use later in the checkpoints directory (src/checkpoints) as 'example_model.pt'
-            save_model(net, config['save_model'])
+            # save_model(net, config['save_model'])
 
             # Save the stats from the training loop for later
-            save_stats(stats, config['save_stats'])
+            # save_stats(stats, config['save_stats'])
 
             test_stats = test(net, test_dataloader, loader_description=f'TESTING: {config["name"]}')
 
-            save_stats(stats, f'test_{config["save_stats"]}')
+            # save_stats(stats, f'test_{config["save_stats"]}')
 
 
     # Models have run, lets plot the stats
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     plt.show()
 
     for t_stat, label in zip(test_stats, labels):
-        print(f'{label} got test accuracy of {t_stat["accuracy"]}')
+        print(f'{label} got test accuracy of {t_stat["epoch_1"]["accuracy"]}')
 
 
     ## Just training for now ##
