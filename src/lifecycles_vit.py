@@ -117,7 +117,7 @@ def test_vit(net: torch.nn.Module, testloader):
             logits = net(images)
             loss = nn.CrossEntropyLoss()(logits, labels)
             predicted = torch.argmax(logits, dim=1)
-            
+
             test_loss += loss.item()
             total_images += labels.size(0)
             correct_images += predicted.eq(labels).sum().item()
@@ -148,6 +148,6 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(net.parameters(), lr=LR)
 
 
-    train(net, optimizer, train_dataloader, epochs=3)
+    train_vit(net, optimizer, train_dataloader, epochs=3)
     # test(net, test_dataloader)
     save_model(net, 'test')

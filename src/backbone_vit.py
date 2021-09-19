@@ -106,18 +106,20 @@ class TransformerEncoderBlock(nn.Sequential):
 class TransformerEncoderBlockBatchNorm(nn.Sequential):
     def __init__(self,
                  emb_size: int = 768,
+                 img_size: int = 224,
+                 patch_size: int = 16,
                  drop_p: float = 0.,
                  forward_expansion: int = 4,
                  forward_drop_p: float = 0.,
-                 ** kwargs):
+                 **kwargs):
         super().__init__(
             ResidualAdd(nn.Sequential(
-                nn.BatchNorm1D(5),
+                nn.BatchNorm1d(int((img_size / patch_size) ** 2) + 1),
                 MultiHeadAttention(emb_size, **kwargs),
                 nn.Dropout(drop_p)
             )),
             ResidualAdd(nn.Sequential(
-                nn.BatchNorm1D(5),
+                nn.BatchNorm1d(int((img_size / patch_size) ** 2) + 1),
                 FeedForwardBlock(
                     emb_size, expansion=forward_expansion, drop_p=forward_drop_p),
                 nn.Dropout(drop_p)
@@ -127,18 +129,39 @@ class TransformerEncoderBlockBatchNorm(nn.Sequential):
 class TransformerEncoderBlockInstanceNorm(nn.Sequential):
     def __init__(self,
                  emb_size: int = 768,
+                 img_size: int = 224,
+                 patch_size: int = 16,
+                 drop_p: float = 0.,
+                 forward_expansion: int = 4,
+                 forward_drop_p: float = 0.,
+                 **kwargs):
+        super().__init__(
+            ResidualAdd(nn.Sequential(
+                nn.InstanceNorm1d(int((img_size / patch_size) ** 2) + 1),
+                MultiHeadAttention(emb_size, **kwargs),
+                nn.Dropout(drop_p)
+            )),
+            ResidualAdd(nn.Sequential(
+                nn.InstanceNorm1d(int((img_size / patch_size) ** 2) + 1),
+                FeedForwardBlock(
+                    emb_size, expansion=forward_expansion, drop_p=forward_drop_p),
+                nn.Dropout(drop_p)
+            )
+            ))
+
+class TransformerEncoderBlockDropout(nn.Sequential):
+    def __init__(self,
+                 emb_size: int = 768,
                  drop_p: float = 0.,
                  forward_expansion: int = 4,
                  forward_drop_p: float = 0.,
                  ** kwargs):
         super().__init__(
             ResidualAdd(nn.Sequential(
-                nn.InstanceNorm1d(5),
-                MultiHeadAttention(emb_size, **kwargs),
+                MultiHeadAttention(emb_size, dropout=drop_p, **kwargs),
                 nn.Dropout(drop_p)
             )),
             ResidualAdd(nn.Sequential(
-                nn.InstanceNorm1d(5),
                 FeedForwardBlock(
                     emb_size, expansion=forward_expansion, drop_p=forward_drop_p),
                 nn.Dropout(drop_p)
@@ -157,6 +180,10 @@ class TransformerEncoderInstanceNorm(nn.Sequential):
     def __init__(self, depth: int = 12, **kwargs):
         super().__init__(*[TransformerEncoderBlockInstanceNorm(**kwargs) for _ in range(depth)])
 
+class TransformerEncoderDropout(nn.Sequential):
+    def __init__(self, depth: int = 12, **kwargs):
+        super().__init__(*[TransformerEncoderBlockDropout(**kwargs) for _ in range(depth)])
+
 class ClassificationHead(nn.Sequential):
     def __init__(self, emb_size: int = 768, n_classes: int = 1000):
         super().__init__(
@@ -171,7 +198,7 @@ class ViT(nn.Sequential):
                 emb_size: int = 240,
                 img_size: int = 32,
                 depth: int = 3,
-                n_classes: int = 100,
+                n_classes: int = 200,
                 **kwargs):
         super().__init__(
             PatchEmbedding(in_channels, patch_size, emb_size, img_size),
@@ -186,11 +213,11 @@ class ViTBatchNorm(nn.Sequential):
                 emb_size: int = 240,
                 img_size: int = 32,
                 depth: int = 3,
-                n_classes: int = 100,
+                n_classes: int = 200,
                 **kwargs):
         super().__init__(
             PatchEmbedding(in_channels, patch_size, emb_size, img_size),
-            TransformerEncoderBatchNorm(depth, emb_size=emb_size, **kwargs),
+            TransformerEncoderBatchNorm(depth, emb_size=emb_size, img_size=img_size, patch_size=patch_size, **kwargs),
             ClassificationHead(emb_size, n_classes)
         )
 
@@ -201,13 +228,28 @@ class ViTInstanceNorm(nn.Sequential):
                 emb_size: int = 240,
                 img_size: int = 32,
                 depth: int = 3,
-                n_classes: int = 100,
+                n_classes: int = 200,
                 **kwargs):
         super().__init__(
             PatchEmbedding(in_channels, patch_size, emb_size, img_size),
-            TransformerEncoderInstanceNorm(depth, emb_size=emb_size, **kwargs),
+            TransformerEncoderInstanceNorm(depth, emb_size=emb_size, img_size=img_size, patch_size=patch_size, **kwargs),
             ClassificationHead(emb_size, n_classes)
         )
 
+class ViTDropout(nn.Sequential):
+    def __init__(self,     
+                in_channels: int = 3,
+                patch_size: int = 16,
+                emb_size: int = 240,
+                img_size: int = 32,
+                depth: int = 3,
+                n_classes: int = 200,
+                dropout_p: float = 0.5,
+                **kwargs):
+        super().__init__(
+            PatchEmbedding(in_channels, patch_size, emb_size, img_size),
+            TransformerEncoder(depth, emb_size=emb_size, img_size=img_size, patch_size=patch_size, drop_p=dropout_p, forward_drop_p=dropout_p, **kwargs),
+            ClassificationHead(emb_size, n_classes)
+        )
 
 
