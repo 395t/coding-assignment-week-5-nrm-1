@@ -1,4 +1,4 @@
-Normalization Methods - Week 5 Group 2
+Normalization Methods - Week 5 Group 1
 -
 
 Papers covered in our repo:
