@@ -33,13 +33,19 @@ class Dropout(nn.Module):
         # d have zeros and ones, where the 1s are populated p percent of the time
         return x
 
+def train_do(
+        dataset: str = "CIFAR-100",
+        classes: int = 100,
+        epochs: int = 20,
+):
+    DATASET = dataset
+    CLASSES = classes
 
-if __name__ == "__main__":
     # This formats the layer such that you can call norm_mod()
     # the partial makes sure to pass 128 into the MyNormLayer(128) later on
     # You can add as many parameters as you need to your layer this way.
 
-    #Create dropout normalizers with p = 0.0, p = 0.25, p = 0.5, and p = 0.75
+    # Create dropout normalizers with p = 0.0, p = 0.25, p = 0.5, and p = 0.75
     norm_mod_00 = partial(Dropout, 128, 0.0)
     norm_mod_00_a = partial(Dropout, 128, 0.0)
 
@@ -57,40 +63,43 @@ if __name__ == "__main__":
     # Create the backbone networks with 100 classes and their respective dropout modules
     # Creating two models to accomodate the two different LRs to be tested per model
     # Additional p = 0.50 model with LR = 0.007 for global comparison
-    net_no_dropout_lr1 = src.Backbone(100, norm_mod_00)
-    net_no_dropout_lr2 = src.Backbone(100, norm_mod_00_a)
+    net_no_dropout_lr1 = src.Backbone(CLASSES, norm_mod_00)
+    net_no_dropout_lr2 = src.Backbone(CLASSES, norm_mod_00_a)
 
-    net_dropout_25_lr1 = src.Backbone(100, norm_mod_25)
-    net_dropout_25_lr2 = src.Backbone(100, norm_mod_25_a)
+    net_dropout_25_lr1 = src.Backbone(CLASSES, norm_mod_25)
+    net_dropout_25_lr2 = src.Backbone(CLASSES, norm_mod_25_a)
 
-    net_dropout_50_lr1 = src.Backbone(100, norm_mod_50)
-    net_dropout_50_lr2 = src.Backbone(100, norm_mod_50_a)
-    net_dropout_50_003 = src.Backbone(100, norm_mod_50_b)
-    net_dropout_50_007 = src.Backbone(100, norm_mod_50_c)
+    net_dropout_50_lr1 = src.Backbone(CLASSES, norm_mod_50)
+    net_dropout_50_lr2 = src.Backbone(CLASSES, norm_mod_50_a)
+    net_dropout_50_003 = src.Backbone(CLASSES, norm_mod_50_b)
+    net_dropout_50_007 = src.Backbone(CLASSES, norm_mod_50_c)
 
-    net_dropout_75_lr1 = src.Backbone(100, norm_mod_75)
-    net_dropout_75_lr2 = src.Backbone(100, norm_mod_75_a)
+    net_dropout_75_lr1 = src.Backbone(CLASSES, norm_mod_75)
+    net_dropout_75_lr2 = src.Backbone(CLASSES, norm_mod_75_a)
 
     # Different models using different dropout probabilities
     configs = [
         # no dropout
-        {'name': 'No dropout, LR: 0.001', 'model': net_no_dropout_lr1, 'save_model': 'net_no_dropout_lr1', 'save_stats': 'net_no_dropout_training_lr1', 'LR': 0.001},
-        {'name': 'No dropout, LR: 0.01', 'model': net_no_dropout_lr2, 'save_model': 'net_no_dropout_lr2', 'save_stats': 'net_no_dropout_training_lr2', 'LR': 0.01},
-        
+        # {'name': 'No dropout, LR: 0.001', 'model': net_no_dropout_lr1, 'save_model': 'net_no_dropout_lr1', 'save_stats': 'net_no_dropout_training_lr1', 'LR': 0.001},
+        # {'name': 'No dropout, LR: 0.01', 'model': net_no_dropout_lr2, 'save_model': 'net_no_dropout_lr2', 'save_stats': 'net_no_dropout_training_lr2', 'LR': 0.01},
+        #
         # dropout p = 0.25
-        {'name': 'Dropoiut of 25%, LR: 0.001', 'model': net_dropout_25_lr1, 'save_model': 'net_dropout_25_lr1', 'save_stats': 'net_dropout_25_training_lr1', 'LR': 0.001},
-        {'name': 'Dropoiut of 25%, LR: 0.01', 'model': net_dropout_25_lr2, 'save_model': 'net_dropout_25_lr2', 'save_stats': 'net_dropout_25_training_lr2', 'LR': 0.01},
+        # {'name': 'Dropoiut of 25%, LR: 0.001', 'model': net_dropout_25_lr1, 'save_model': 'net_dropout_25_lr1', 'save_stats': 'net_dropout_25_training_lr1', 'LR': 0.001},
+        # {'name': 'Dropoiut of 25%, LR: 0.01', 'model': net_dropout_25_lr2, 'save_model': 'net_dropout_25_lr2', 'save_stats': 'net_dropout_25_training_lr2', 'LR': 0.01},
 
         # dropout p = 0.50
-        {'name': 'Dropout of 50%, LR: 0.001', 'model': net_dropout_50_lr1, 'save_model': 'net_dropout_50_lr1', 'save_stats': 'net_dropout_50_lr1', 'LR': 0.001},
-        {'name': 'Dropout of 50%, LR: 0.01', 'model': net_dropout_50_lr2, 'save_model': 'net_dropout_50_lr2', 'save_stats': 'net_dropout_50_lr2', 'LR': 0.01},
-        {'name': 'Dropout of 50%, LR: 0.003', 'model': net_dropout_50_003, 'save_model': 'net_dropout_50_003', 'save_stats': 'net_dropout_50_003', 'LR': 0.003},
-        {'name': 'Dropout of 50%, LR: 0.007', 'model': net_dropout_50_007, 'save_model': 'net_dropout_50_007', 'save_stats': 'net_dropout_50_007', 'LR': 0.007},
-
+        {'name': 'Dropout of 50%, LR: 0.001', 'model': net_dropout_50_lr1,
+         'save_model': f'DO_{DATASET}|net_dropout_50_lr1', 'save_stats': f'DO_{DATASET}|net_dropout_50_lr1',
+         'LR': 0.001},
+        # {'name': 'Dropout of 50%, LR: 0.01', 'model': net_dropout_50_lr2, 'save_model': 'net_dropout_50_lr2', 'save_stats': 'net_dropout_50_lr2', 'LR': 0.01},
+        {'name': 'Dropout of 50%, LR: 0.003', 'model': net_dropout_50_003,
+         'save_model': f'DO_{DATASET}|net_dropout_50_003', 'save_stats': f'DO_{DATASET}|net_dropout_50_003',
+         'LR': 0.003},
+        # {'name': 'Dropout of 50%, LR: 0.007', 'model': net_dropout_50_007, 'save_model': 'net_dropout_50_007', 'save_stats': 'net_dropout_50_007', 'LR': 0.007},
 
         # dropout p = 0.75
-        {'name': 'Dropout of 75%, LR: 0.001', 'model': net_dropout_75_lr1, 'save_model': 'net_dropout_75_lr1', 'save_stats': 'net_dropout_75_lr1', 'LR': 0.001},
-        {'name': 'Dropout of 75%, LR: 0.01', 'model': net_dropout_75_lr2, 'save_model': 'net_dropout_75_lr2', 'save_stats': 'net_dropout_75_lr2', 'LR': 0.01}
+        # {'name': 'Dropout of 75%, LR: 0.001', 'model': net_dropout_75_lr1, 'save_model': 'net_dropout_75_lr1', 'save_stats': 'net_dropout_75_lr1', 'LR': 0.001},
+        # {'name': 'Dropout of 75%, LR: 0.01', 'model': net_dropout_75_lr2, 'save_model': 'net_dropout_75_lr2', 'save_stats': 'net_dropout_75_lr2', 'LR': 0.01}
     ]
 
     # Train the network on the Adam optimizer, using the training data loader, for 3 epochs
@@ -100,7 +109,7 @@ if __name__ == "__main__":
         net = config['model']
 
         # Grab the CIFAR-100 dataset, with a batch size of 10, and store it in the Data Directory (src/data)
-        train_dataloader, test_dataloader = src.get_dataloder('CIFAR-100', 64, DATA_DIR)
+        train_dataloader, test_dataloader = src.get_dataloder(DATASET, 64, DATA_DIR)
 
         # Set up a learning rate and optimizer
         optimizer = torch.optim.Adam(net.parameters(), lr=config['LR'])
@@ -135,24 +144,28 @@ if __name__ == "__main__":
     plt.show()
 
     # For every config, plot the accuracy across the number of epochs
-    plt = compare_training_stats(all_stats, labels, metric_to_compare='accuracy', y_label='accuracy', title='Accuracy vs Epoch')
+    plt = compare_training_stats(all_stats, labels, metric_to_compare='accuracy', y_label='accuracy',
+                                 title='Accuracy vs Epoch')
     save_plt(plt, 'acc_test_dropout')
     # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
     plt.show()
 
-    for data in test_data:
-        print(f'{data["name"]}: {data["accuracy"]}')
+
+    save_stats({"data": test_data}, f'DO_test_{dataset}')
 
 
-    ## Just training for now ##
+if __name__ == "__main__":
+    train_do(
+        dataset="TINY",
+        classes=200,
+        epochs=10
+    )
 
-    # load the model from the saved file
-    #net = load_modal('dropout_model')
-    # switch model to eval mode so dropout does not get applied
-    #net.eval()
-
-    # Test the model on the test dataloader
-    #test(net, test_dataloader)
+    train_do(
+        dataset="STL10",
+        classes=10,
+        epochs=20
+    )
 
 """
  No dropout, LR: 0.001: 44.2
