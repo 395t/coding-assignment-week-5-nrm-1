@@ -41,7 +41,7 @@ Setup:
 
 - Batch size of 64
 - 20 epochs
-- learning rate of 0.003
+- learning rate of 0.003 and one Custom LR run (paper owner chose a different LR)
     
 
 CHART HERE
@@ -87,9 +87,18 @@ Setup:
 
 - Batch size of 64
 - 10 epochs (it took too long to train for longer epochs)
-- learning rate of 0.003
+- learning rate of 0.003 and one Custom LR run (paper owner chose a different LR)
 
-CHART HERE
+![TINY Training Loss Chart lr 003](./images/TINY-Loss-vs-Epoch-003-Training.png)
+![TINY Training Loss Chart lr custom](./images/TINY-Loss-vs-Epoch-custom-Training.png)
+
+| Normalization | Test Acc @ 0.003 | Test Acc @ Custom |
+| --- | --- | --- |
+| Weight Normalization | 26.78 | 28.13 |
+| Batch Normalization | 23.38 | 14.5 |
+| Drop Out | 13.72 | 14.39 |
+| Layer Normalization | 15.62 | 15.68 |
+| Instance Normalization | | |
 
 
 
