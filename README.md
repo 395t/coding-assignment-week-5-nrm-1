@@ -69,8 +69,8 @@ Setup:
 | --- | --- | --- |
 | Weight Normalization | 43.3 | 46.6 |
 | Batch Normalization | 56.8875 | 60.1 |
-| Drop Out | 43.89 | |
-| Layer Normalization | | |
+| Drop Out | 43.89 | 52.08 |
+| Layer Normalization | 46.75 | 57.0 |
 | Instance Normalization | | |
 
 ### Tiny ImageNet Task Performance per Normalization
