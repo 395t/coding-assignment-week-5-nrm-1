@@ -125,6 +125,7 @@ if __name__ == "__main__":
 
     # load the model from the saved file
     #net = load_modal('dropout_model')
+    # switch model to eval mode so dropout does not get applied
     #net.eval()
 
     # Test the model on the test dataloader
