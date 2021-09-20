@@ -19,7 +19,7 @@ class MyNormLayer(nn.Module):
 
 
 if __name__ == "__main__":
-    for dataset, num_classes in (('STL10', 100), ('TINY', 200)):
+    for dataset, num_classes in (('TINY', 200),):
         # Experiments to reproduce from batch norm paper
         experiments = {
             'baseline': {'mod': MyNormLayer, 'lr': 0.001},
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
             # can use below for quick test
             # train_metrics = train(net, optimizer, list(train_dataloader)[:1], epochs=2)
-            train_metrics = train(net, optimizer, train_dataloader, epochs=20)
+            train_metrics = train(net, optimizer, train_dataloader, epochs=10)
 
             save_path = f'{dataset}_{exp_name}_train_metrics'
             save_stats(train_metrics, save_path)
@@ -93,6 +93,6 @@ if __name__ == "__main__":
         save_stats(test_acc, f'{dataset}_test_acc')
 
 """
-{"TINY_baseline": 0.53, "TINY_batch_norm": 0.57, "TINY_batch_norm_3x": 1.08, "TINY_batch_norm_5x": 0.95, "TINY_batch_norm_30x": 10.59}
+{"TINY_baseline": 20.13, "TINY_batch_norm": 31.89, "TINY_batch_norm_3x": 23.38, "TINY_batch_norm_5x": 14.5, "TINY_batch_norm_30x": 0.82}
 {"STL10_baseline": 59.975, "STL10_batch_norm": 62.175, "STL10_batch_norm_3x": 56.8875, "STL10_batch_norm_5x": 60.1, "STL10_batch_norm_30x": 40.5875}
 """
