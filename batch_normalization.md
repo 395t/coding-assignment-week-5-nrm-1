@@ -8,14 +8,19 @@ The batch normalized model with default learning rate of 0.001 gets the highest 
 
 # Training Loss Per Dataset
 
-<img width="500px" src="images/CIFAR-100_loss_train.png"/>
-<em>CIFAR-100</em>
+|<img width="500px" src="images/CIFAR-100_loss_train.png"/>|
+|:--:|
+|CIFAR-100|
 <br>
-<img width="500px" src="images/STL10_loss_train.png"/>
-<em>STL-10</em>
+
+|<img width="500px" src="images/STL10_loss_train.png"/>|
+|:--:|
+|STL-10|
 <br>
-<img width="500px" src="images/TINY_loss_train.png"/>
-<em>TinyImageNet</em>
+
+|<img width="500px" src="images/TINY_loss_train.png"/>|
+|:--:|
+|TinyImageNet|
 <br>
 
 
