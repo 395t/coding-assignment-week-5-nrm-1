@@ -3,6 +3,8 @@ data
 src/stats
 src/data
 src/checkpoints
+tiny-imagenet-200.zip
+tiny-imagenet-200
 
 ### Python template
 # Byte-compiled / optimized / DLL files
