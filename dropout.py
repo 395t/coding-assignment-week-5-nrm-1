@@ -21,15 +21,15 @@ class Dropout(nn.Module):
     def __init__(self, extra_parameter_saved_via_partial, p=0.0):
         super(Dropout, self).__init__()
         # Using pytorch built-in Dropout module 
+        # This nn module applies dropout only during training
+        # -> no need to add condition to turn dropout on/off during training/testing
         self.drop_layer = nn.Dropout(p=p)
 
     def forward(self, x):
         # Simply apply dropout, only during training
-        if self.training:
-            x = self.drop_layer(x)
+        x = self.drop_layer(x)
         # matrix that is the same size as x | d
         # d have zeros and ones, where the 1s are populated p percent of the time
-        # only do this if we are training (self.model (parent) .is_training)
         return x
 
 
@@ -45,6 +45,7 @@ if __name__ == "__main__":
     norm_mod_75 = partial(Dropout, 128, 0.75)
     # Create the backbone networks with 100 classes and their respective dropout modules
     # Creating two models to accomodate the two different LRs to be tested per model
+    # Additional p = 0.50 model with LR = 0.007 for global comparison
     net_no_dropout_lr1 = src.Backbone(100, norm_mod_00)
     net_no_dropout_lr2 = src.Backbone(100, norm_mod_00)
 
@@ -53,6 +54,7 @@ if __name__ == "__main__":
 
     net_dropout_50_lr1 = src.Backbone(100, norm_mod_50)
     net_dropout_50_lr2 = src.Backbone(100, norm_mod_50)
+    net_dropout_50_007 = src.Backbone(100, norm_mod_50)
 
     net_dropout_75_lr1 = src.Backbone(100, norm_mod_75)
     net_dropout_75_lr2 = src.Backbone(100, norm_mod_75) 
@@ -70,6 +72,7 @@ if __name__ == "__main__":
         # dropout p = 0.50
         {'name': 'Dropout of 50%, LR: 0.001', 'model': net_dropout_50_lr1, 'save_model': 'net_dropout_50_lr1', 'save_stats': 'net_dropout_50_lr1', 'LR': 0.001},
         {'name': 'Dropout of 50%, LR: 0.01', 'model': net_dropout_50_lr2, 'save_model': 'net_dropout_50_lr2', 'save_stats': 'net_dropout_50_lr2', 'LR': 0.01},
+        {'name': 'Dropout of 50%, LR: 0.007', 'model': net_dropout_50_007, 'save_model': 'net_dropout_50_007', 'save_stats': 'net_dropout_50_007', 'LR': 0.007},
         
         # dropout p = 0.75
         {'name': 'Dropout of 75%, LR: 0.001', 'model': net_dropout_75_lr1, 'save_model': 'net_dropout_75_lr1', 'save_stats': 'net_dropout_75_lr1', 'LR': 0.001},
@@ -122,6 +125,7 @@ if __name__ == "__main__":
 
     # load the model from the saved file
     #net = load_modal('dropout_model')
+    #net.eval()
 
     # Test the model on the test dataloader
     #test(net, test_dataloader)
