@@ -36,7 +36,7 @@ to converge at better test accuracies.
 
 Interestingly, I expected my implementation to match PyTorches, however, there were significant differences
 in the results shown in the graph.  PyTorches implementation has a few slight differences in their forward
-call, but they also do not divide the weight matrix by g when initializing the v vector.  
+call, but they also do not divide the weight matrix by g when initializing the v matrix.  
 
 Although this is probably harmless, I experimented with this myself but the test results were inconclusive, 
 so the discrepancy is an unsolved oddity. 
