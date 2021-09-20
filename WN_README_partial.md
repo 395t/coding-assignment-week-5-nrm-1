@@ -39,4 +39,5 @@ in the results shown in the graph.  PyTorches implementation has a few slight di
 call, but they also do not divide the weight matrix by g when initializing the v matrix.  
 
 Although this is probably harmless, I experimented with this myself but the test results were inconclusive, 
-so the discrepancy is an unsolved oddity. 
+so the discrepancy is an unsolved oddity. (one potential explanation that I did not have time to explore is 
+that pytorch uses the L2 norm for the weight calculation, I used L1)
