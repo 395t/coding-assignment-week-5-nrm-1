@@ -1,6 +1,6 @@
 # Batch Normalization Experiments
 
-These experiments compare a baseline CNN model to the same model with batch normalization. We implement batch normalization using `torch.nn.2dBatchNorm`. As in the paper, we compare three variants of batch normalization: one with a default LR of 0.001, and two variants with a 5x and 30x increase in learning rate.
+These experiments compare a baseline CNN model to the same model with batch normalization. We implement batch normalization using `torch.nn.BatchNorm2d`. As in the paper, we compare three variants of batch normalization: one with a default LR of 0.001, and two variants with a 5x and 30x increase in learning rate.
 
 # Results
 
