@@ -49,10 +49,10 @@ Setup:
 
 | Normalization | Test Acc @ 0.003 | Test Acc @ Custom |
 | --- | --- | --- |
-| Weight Normalization | |  |
-| Batch Normalization |  |  |
-| Drop Out |  |  |
-| Layer Normalization |  |  |
+| Weight Normalization | 44.1 | 46.52 |
+| Batch Normalization | 44.09 | 41.36 |
+| Drop Out | 27.3 | 38.02 |
+| Layer Normalization | 31.74 | 37.04 |
 | Instance Normalization | | |
 
 ### STL10 Task Performance per Normalization
