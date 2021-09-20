@@ -4,7 +4,8 @@ from torch import nn
 from functools import partial
 
 from src.paths import CHECKPOINTS_DIR, DATA_DIR
-from src.lifecycles import train, test, save_model, load_modal
+from src.lifecycles import train, test, save_model, load_modal, save_stats, load_stats
+from src.viz_helper import compare_training_stats, save_plt
 
 def basic_backbone_example():
     # Put any hyper parameter into your normalization module using partial
@@ -40,24 +41,35 @@ if __name__ == "__main__":
 
     #Create dropout normalizers with p = 0.0, p = 0.25, p = 0.5, and p = 0.75
     norm_mod_00 = partial(Dropout, 128, 0.0)
+    norm_mod_00_a = partial(Dropout, 128, 0.0)
+
     norm_mod_25 = partial(Dropout, 128, 0.25)
+    norm_mod_25_a = partial(Dropout, 128, 0.25)
+
     norm_mod_50 = partial(Dropout, 128, 0.50)
+    norm_mod_50_a = partial(Dropout, 128, 0.50)
+    norm_mod_50_b = partial(Dropout, 128, 0.50)
+    norm_mod_50_c = partial(Dropout, 128, 0.50)
+
     norm_mod_75 = partial(Dropout, 128, 0.75)
+    norm_mod_75_a = partial(Dropout, 128, 0.75)
+
     # Create the backbone networks with 100 classes and their respective dropout modules
     # Creating two models to accomodate the two different LRs to be tested per model
     # Additional p = 0.50 model with LR = 0.007 for global comparison
     net_no_dropout_lr1 = src.Backbone(100, norm_mod_00)
-    net_no_dropout_lr2 = src.Backbone(100, norm_mod_00)
+    net_no_dropout_lr2 = src.Backbone(100, norm_mod_00_a)
 
     net_dropout_25_lr1 = src.Backbone(100, norm_mod_25)
-    net_dropout_25_lr2 = src.Backbone(100, norm_mod_25)
+    net_dropout_25_lr2 = src.Backbone(100, norm_mod_25_a)
 
     net_dropout_50_lr1 = src.Backbone(100, norm_mod_50)
-    net_dropout_50_lr2 = src.Backbone(100, norm_mod_50)
-    net_dropout_50_007 = src.Backbone(100, norm_mod_50)
+    net_dropout_50_lr2 = src.Backbone(100, norm_mod_50_a)
+    net_dropout_50_003 = src.Backbone(100, norm_mod_50_b)
+    net_dropout_50_007 = src.Backbone(100, norm_mod_50_c)
 
     net_dropout_75_lr1 = src.Backbone(100, norm_mod_75)
-    net_dropout_75_lr2 = src.Backbone(100, norm_mod_75) 
+    net_dropout_75_lr2 = src.Backbone(100, norm_mod_75_a)
 
     # Different models using different dropout probabilities
     configs = [
@@ -72,8 +84,10 @@ if __name__ == "__main__":
         # dropout p = 0.50
         {'name': 'Dropout of 50%, LR: 0.001', 'model': net_dropout_50_lr1, 'save_model': 'net_dropout_50_lr1', 'save_stats': 'net_dropout_50_lr1', 'LR': 0.001},
         {'name': 'Dropout of 50%, LR: 0.01', 'model': net_dropout_50_lr2, 'save_model': 'net_dropout_50_lr2', 'save_stats': 'net_dropout_50_lr2', 'LR': 0.01},
+        {'name': 'Dropout of 50%, LR: 0.003', 'model': net_dropout_50_003, 'save_model': 'net_dropout_50_003', 'save_stats': 'net_dropout_50_003', 'LR': 0.003},
         {'name': 'Dropout of 50%, LR: 0.007', 'model': net_dropout_50_007, 'save_model': 'net_dropout_50_007', 'save_stats': 'net_dropout_50_007', 'LR': 0.007},
-        
+
+
         # dropout p = 0.75
         {'name': 'Dropout of 75%, LR: 0.001', 'model': net_dropout_75_lr1, 'save_model': 'net_dropout_75_lr1', 'save_stats': 'net_dropout_75_lr1', 'LR': 0.001},
         {'name': 'Dropout of 75%, LR: 0.01', 'model': net_dropout_75_lr2, 'save_model': 'net_dropout_75_lr2', 'save_stats': 'net_dropout_75_lr2', 'LR': 0.01}
@@ -81,17 +95,18 @@ if __name__ == "__main__":
 
     # Train the network on the Adam optimizer, using the training data loader, for 3 epochs
     # This will train the four different dropout configurations, each with LR of 0.001, and 0.01
+    test_data = []
     for config in configs:
         net = config['model']
 
         # Grab the CIFAR-100 dataset, with a batch size of 10, and store it in the Data Directory (src/data)
-        train_dataloader, test_dataloader = src.get_dataloder('CIFAR-100', 10, DATA_DIR)
+        train_dataloader, test_dataloader = src.get_dataloder('CIFAR-100', 64, DATA_DIR)
 
         # Set up a learning rate and optimizer
         optimizer = torch.optim.Adam(net.parameters(), lr=config['LR'])
 
         # Train network
-        train(net, optimizer, train_dataloader, epochs=3, loader_description=config['name'])
+        stats = train(net, optimizer, train_dataloader, epochs=20, loader_description=config['name'])
 
         # Save the model for use later in the checkpoints directory (src/checkpoints) as 'example_model.pt'
         save_model(net, config['save_model'])
@@ -99,6 +114,12 @@ if __name__ == "__main__":
         # Save the stats from the training loop for later
         save_stats(stats, config['save_stats'])
 
+        test_stats = test(net, test_dataloader)
+        test_data.append({'name': config['name'], 'acc': test_stats['accuracy']})
+
+        print(f"TESTING COMPLETE: {config['name']}: {test_stats['accuracy']}")
+
+        save_stats(test_stats, f"dropout_test_{config['save_stats']}")
 
     # Models have run, lets plot the stats
     all_stats = []
@@ -119,6 +140,8 @@ if __name__ == "__main__":
     # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
     plt.show()
 
+    for data in test_data:
+        print(f'{data["name"]}: {data["accuracy"]}')
 
 
     ## Just training for now ##
@@ -130,3 +153,19 @@ if __name__ == "__main__":
 
     # Test the model on the test dataloader
     #test(net, test_dataloader)
+
+"""
+ No dropout, LR: 0.001: 44.2
+ No dropout, LR: 0.01: 1.0
+ 
+ Dropoiut of 25%, LR: 0.001: 45.03
+ Dropoiut of 25%, LR: 0.01: 1.0
+ 
+ Dropout of 50%, LR: 0.001: 38.02
+ Dropout of 50%, LR: 0.01: 1.0
+ Dropout of 50%, LR: 0.003: 27.3
+ Dropout of 50%, LR: 0.007: 1.0
+ 
+ Dropout of 75%, LR: 0.001: 22.07
+ Dropout of 75%, LR: 0.01: 1.08
+"""
