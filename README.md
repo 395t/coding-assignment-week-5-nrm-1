@@ -22,7 +22,7 @@ Our main architecture all normalizations were tested on was a ResNet backbone, h
 tested Weight Normalization on ConvPool-CNN-C (a model that was explored in the paper). The last
 model we tried was a custom integration of the Visual Transformer ViT.
 
-- Resent
+- Resnet
 - ViT
 - ConvPool-CNN-C
 
