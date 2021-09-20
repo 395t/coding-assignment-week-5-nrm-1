@@ -247,10 +247,130 @@ def create_CIFAR_custom_charts():
     plt.show()
 
 
+def create_ViT_CIFAR_charts():
+    training_loss_stat_files_003 = [
+        "ViT_LayerNorm_CIFAR-100_training_stats",
+        "ViT_WeightNorm_CIFAR-100_training_stats",
+        "ViT_BatchNorm_CIFAR-100_training_stats",
+        "ViT_DropOut_CIFAR-100_training_stats",
+        "ViT_InstanceNorm_CIFAR-100_training_stats"
+    ]
+
+    ln = load_stats(training_loss_stat_files_003[0])
+    wn = load_stats(training_loss_stat_files_003[1])
+    bn = load_stats(training_loss_stat_files_003[2])
+    do = load_stats(training_loss_stat_files_003[3])
+    _in = load_stats(training_loss_stat_files_003[4])
+
+    labels = [
+        "Layer Normalization",
+        "Weight Normalization",
+        "Batch Normalization",
+        "Drop Out 50%",
+        "Instance Norm",
+    ]
+
+    training_sets = [
+        ln,
+        wn,
+        bn,
+        do,
+       _in,
+    ]
+
+    # For every config, plot the accuracy across the number of epochs
+    plt = compare_training_stats(training_sets, labels, metric_to_compare='loss', y_label='training loss',
+                                 title='CIFAR100 ViT Loss vs Epoch', legend_loc='upper right')
+    save_plt(plt, "ViT_CIFAR100-Loss-vs-Epoch-custom-Training")
+    # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
+    plt.show()
+
+def create_ViT_STL10_charts():
+    training_loss_stat_files_003 = [
+        "ViT_LayerNorm_STL10_training_stats",
+        "ViT_WeightNorm_STL10_training_stats",
+        "ViT_BatchNorm_STL10_training_stats",
+        "ViT_DropOut_STL10_training_stats",
+        "ViT_InstanceNorm_STL10_training_stats"
+    ]
+
+    ln = load_stats(training_loss_stat_files_003[0])
+    wn = load_stats(training_loss_stat_files_003[1])
+    bn = load_stats(training_loss_stat_files_003[2])
+    do = load_stats(training_loss_stat_files_003[3])
+    _in = load_stats(training_loss_stat_files_003[4])
+
+    labels = [
+        "Layer Normalization",
+        "Weight Normalization",
+        "Batch Normalization",
+        "Drop Out 50%",
+        "Instance Norm",
+    ]
+
+    training_sets = [
+        ln,
+        wn,
+        bn,
+        do,
+       _in,
+    ]
+
+    # For every config, plot the accuracy across the number of epochs
+    plt = compare_training_stats(training_sets, labels, metric_to_compare='loss', y_label='training loss',
+                                 title='STL10 ViT Loss vs Epoch', legend_loc='upper right')
+    save_plt(plt, "ViT_STL10-Loss-vs-Epoch-custom-Training")
+    # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
+    plt.show()
+
+
+def create_ViT_TINY_charts():
+    training_loss_stat_files_003 = [
+        "ViT_LayerNorm_TINY_training_stats",
+        "ViT_WeightNorm_TINY_training_stats",
+        "ViT_BatchNorm_TINY_training_stats",
+        "ViT_DropOut_TINY_training_stats",
+        "ViT_InstanceNorm_TINY_training_stats"
+    ]
+
+    ln = load_stats(training_loss_stat_files_003[0])
+    wn = load_stats(training_loss_stat_files_003[1])
+    bn = load_stats(training_loss_stat_files_003[2])
+    do = load_stats(training_loss_stat_files_003[3])
+    _in = load_stats(training_loss_stat_files_003[4])
+
+    labels = [
+        "Layer Normalization",
+        "Weight Normalization",
+        "Batch Normalization",
+        "Drop Out 50%",
+        "Instance Norm",
+    ]
+
+    training_sets = [
+        ln,
+        wn,
+        bn,
+        do,
+        _in,
+    ]
+
+    # For every config, plot the accuracy across the number of epochs
+    plt = compare_training_stats(training_sets, labels, metric_to_compare='loss', y_label='training loss',
+                                 title='TINY ViT Loss vs Epoch', legend_loc='upper right')
+    save_plt(plt, "ViT_TINY-Loss-vs-Epoch-custom-Training")
+    # plt.show WILL WIPE THE PLT, so make sure you save the plot before you show it
+    plt.show()
+
+
 if __name__ == "__main__":
-    create_STL10_custom_charts()
-    create_STL10_003_charts()
-    create_TINY_custom_charts()
-    create_TINY_003_charts()
-    create_CIFAR_custom_charts()
-    create_CIFAR_003_charts()
+    # create_STL10_custom_charts()
+    # create_STL10_003_charts()
+    # create_TINY_custom_charts()
+    # create_TINY_003_charts()
+    # create_CIFAR_custom_charts()
+    # create_CIFAR_003_charts()
+
+    create_ViT_CIFAR_charts()
+    create_ViT_STL10_charts()
+    create_ViT_TINY_charts()

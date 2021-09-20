@@ -1,13 +1,11 @@
 
-import src
-import pickle as pkl
 import torch
 from torch import nn
-from functools import partial
 
-from src.paths import CHECKPOINTS_DIR, DATA_DIR
+from src.paths import DATA_DIR
 from src.lifecycles import train, test, test_validation, save_model, load_modal, save_stats, load_stats
 from src.viz_helper import compare_training_stats, save_plt
+from src.dataloader import get_dataloder
 from src.backbone import BackboneLayerNorm
 
 if __name__ == "__main__":
@@ -18,7 +16,7 @@ if __name__ == "__main__":
             'ln_003': {'mod': BackboneLayerNorm(num_classes=num_classes, img_size=img_size), 'lr': 0.003},
         }
         # Grab the dataset, with a batch size of 10, and store it in the Data Directory (src/data)
-        train_dataloader, test_dataloader = src.get_dataloder(dataset, 64, DATA_DIR)
+        train_dataloader, test_dataloader = get_dataloder(dataset, 64, DATA_DIR)
 
         for exp_name, config in experiments.items():
             print(f'---Running experiment {exp_name} on dataset {dataset} ---')

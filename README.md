@@ -109,6 +109,32 @@ Setup:
 | Layer Normalization | 15.62 | 15.68 |
 | Instance Normalization | | |
 
+### ViT Tests
 
+Description: To test a different architecture other than
+Conv Nets, we ran our normalization layers on a ViT network
+across all 3 datasets.
+
+Setup:
+
+- Batch size of 64
+- 20 epochs (10 for Tiny ImageNet)
+- Learning rate of 0.001
+
+
+
+![ViT CIFAR100 Training Loss Chart lr 003](./images/ViT_CIFAR100-Loss-vs-Epoch-custom-Training.png)
+![ViT STL10 Training Loss Chart lr custom](./images/ViT_STL10-Loss-vs-Epoch-custom-Training.png)
+![ViT TINY Training Loss Chart lr custom](./images/ViT_TINY-Loss-vs-Epoch-custom-Training.png)
+
+Test accuracies:
+
+| Normalization | CIFAR 100 | STL10 | Tiny ImageNet |
+| --- | --- | --- | --- |
+| Weight Normalization | 5.02 | 10.6 | 0.79 |
+| Batch Normalization | 27.5 | 42.18 | 14.65 |
+| Drop Out | 26.07 | 43.29 | 12.96 |
+| Layer Normalization | 28.34 | 42.14 | 13.71 |
+| Instance Normalization | 30.32 | 43.6 | 13.25 |
 
 
