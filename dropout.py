@@ -37,6 +37,7 @@ def train_do(
         dataset: str = "CIFAR-100",
         classes: int = 100,
         epochs: int = 20,
+        train: bool = True,
 ):
     DATASET = dataset
     CLASSES = classes
@@ -88,9 +89,9 @@ def train_do(
         # {'name': 'Dropoiut of 25%, LR: 0.01', 'model': net_dropout_25_lr2, 'save_model': 'net_dropout_25_lr2', 'save_stats': 'net_dropout_25_training_lr2', 'LR': 0.01},
 
         # dropout p = 0.50
-        {'name': 'Dropout of 50%, LR: 0.001', 'model': net_dropout_50_lr1,
-         'save_model': f'DO_{DATASET}|net_dropout_50_lr1', 'save_stats': f'DO_{DATASET}|net_dropout_50_lr1',
-         'LR': 0.001},
+        # {'name': 'Dropout of 50%, LR: 0.001', 'model': net_dropout_50_lr1,
+        #  'save_model': f'DO_{DATASET}|net_dropout_50_lr1', 'save_stats': f'DO_{DATASET}|net_dropout_50_lr1',
+        #  'LR': 0.001},
         # {'name': 'Dropout of 50%, LR: 0.01', 'model': net_dropout_50_lr2, 'save_model': 'net_dropout_50_lr2', 'save_stats': 'net_dropout_50_lr2', 'LR': 0.01},
         {'name': 'Dropout of 50%, LR: 0.003', 'model': net_dropout_50_003,
          'save_model': f'DO_{DATASET}|net_dropout_50_003', 'save_stats': f'DO_{DATASET}|net_dropout_50_003',
@@ -104,31 +105,32 @@ def train_do(
 
     # Train the network on the Adam optimizer, using the training data loader, for 3 epochs
     # This will train the four different dropout configurations, each with LR of 0.001, and 0.01
-    test_data = []
-    for config in configs:
-        net = config['model']
+    #test_data = []
+    if train:
+        for config in configs:
+            net = config['model']
 
-        # Grab the CIFAR-100 dataset, with a batch size of 10, and store it in the Data Directory (src/data)
-        train_dataloader, test_dataloader = src.get_dataloder(DATASET, 64, DATA_DIR)
+            # Grab the CIFAR-100 dataset, with a batch size of 10, and store it in the Data Directory (src/data)
+            train_dataloader, test_dataloader = src.get_dataloder(DATASET, 64, DATA_DIR)
 
-        # Set up a learning rate and optimizer
-        optimizer = torch.optim.Adam(net.parameters(), lr=config['LR'])
+            # Set up a learning rate and optimizer
+            optimizer = torch.optim.Adam(net.parameters(), lr=config['LR'])
 
-        # Train network
-        stats = train(net, optimizer, train_dataloader, epochs=20, loader_description=config['name'])
+            # Train network
+            stats = train(net, optimizer, train_dataloader, epochs=epochs, loader_description=config['name'])
 
-        # Save the model for use later in the checkpoints directory (src/checkpoints) as 'example_model.pt'
-        save_model(net, config['save_model'])
+            # Save the model for use later in the checkpoints directory (src/checkpoints) as 'example_model.pt'
+            save_model(net, config['save_model'])
 
-        # Save the stats from the training loop for later
-        save_stats(stats, config['save_stats'])
+            # Save the stats from the training loop for later
+            save_stats(stats, config['save_stats'])
 
-        test_stats = test(net, test_dataloader)
-        test_data.append({'name': config['name'], 'acc': test_stats['accuracy']})
+            test_stats = test(net, test_dataloader)
+            #test_data.append({'name': config['name'], 'acc': test_stats['accuracy']})
 
-        print(f"TESTING COMPLETE: {config['name']}: {test_stats['accuracy']}")
+            print(f"TESTING COMPLETE: {config['name']}: {test_stats['accuracy']}")
 
-        save_stats(test_stats, f"dropout_test_{config['save_stats']}")
+            save_stats(test_stats, f"dropout_test_{config['save_stats']}")
 
     # Models have run, lets plot the stats
     all_stats = []
@@ -151,21 +153,22 @@ def train_do(
     plt.show()
 
 
-    save_stats({"data": test_data}, f'DO_test_{dataset}')
+    #save_stats({"data": test_data}, f'DO_test_{dataset}')
 
 
 if __name__ == "__main__":
     train_do(
         dataset="TINY",
         classes=200,
-        epochs=10
+        epochs=10,
+        train=False
     )
 
-    train_do(
-        dataset="STL10",
-        classes=10,
-        epochs=20
-    )
+    # train_do(
+    #     dataset="STL10",
+    #     classes=10,
+    #     epochs=20
+    # )
 
 """
  No dropout, LR: 0.001: 44.2
@@ -181,4 +184,11 @@ if __name__ == "__main__":
  
  Dropout of 75%, LR: 0.001: 22.07
  Dropout of 75%, LR: 0.01: 1.08
+"""
+
+"""
+
+TINY test accuracy  = Dropout of 50%, LR: 0.003: 13.72
+STL test accuracy = Accuracy on Test Set is 43.8875
+
 """
