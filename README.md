@@ -44,7 +44,16 @@ Setup:
 - learning rate of 0.003 and one Custom LR run (paper owner chose a different LR)
     
 
-CHART HERE
+![CIFAR100 Training Loss Chart lr 003](./images/CIFAR100-Loss-vs-Epoch-003-Training.png)
+![CIFAR100 Training Loss Chart lr custom](./images/CIFAR100-Loss-vs-Epoch-custom-Training.png)
+
+| Normalization | Test Acc @ 0.003 | Test Acc @ Custom |
+| --- | --- | --- |
+| Weight Normalization | |  |
+| Batch Normalization |  |  |
+| Drop Out |  |  |
+| Layer Normalization |  |  |
+| Instance Normalization | | |
 
 ### STL10 Task Performance per Normalization
 
