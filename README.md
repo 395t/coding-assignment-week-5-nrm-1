@@ -62,7 +62,16 @@ Setup:
 - 20 epochs
 - learning rate of 0.003
 
-CHART HERE
+![STL10 Training Loss Chart lr 003](./images/STL10-Loss-vs-Epoch-003-Training.png)
+![STL10 Training Loss Chart lr custom](./images/STL10-Loss-vs-Epoch-custom-Training.png)
+
+| Normalization | Test Acc @ 0.003 | Test Acc @ Custom |
+| --- | --- | --- |
+| Weight Normalization | 43.3 | 46.6 |
+| Batch Normalization | 56.8875 | 60.1 |
+| Drop Out | 43.89 | |
+| Layer Normalization | | |
+| Instance Normalization | | |
 
 ### Tiny ImageNet Task Performance per Normalization
 
