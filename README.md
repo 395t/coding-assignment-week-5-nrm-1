@@ -26,6 +26,8 @@ model we tried was a custom integration of the Visual Transformer ViT.
 - ViT
 - ConvPool-CNN-C
 
+# Main Experiments 
+
 ### CIFAR 100 Task Performance per Normalization
 
 Description:
