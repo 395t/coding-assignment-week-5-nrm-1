@@ -138,3 +138,85 @@ Test accuracies:
 | Instance Normalization | 30.32 | 43.6 | 13.25 |
 
 
+# Other Experiments
+
+
+Batch Normalization Experiments
+-
+
+These experiments compare a baseline CNN model to the same model with batch normalization. We implement batch normalization using `torch.nn.BatchNorm2d`. As in the paper, we compare three variants of batch normalization: one with a default LR of 0.001, and two variants with a 5x and 30x increase in learning rate.
+
+### Results
+
+The batch normalized model with default learning rate of 0.001 gets the highest test accuracy across all three datasets.
+
+### Training Loss Per Dataset
+
+|<img width="500px" src="images/CIFAR-100_loss_train.png"/>|
+|:--:|
+|CIFAR-100|
+<br>
+
+|<img width="500px" src="images/STL10_loss_train.png"/>|
+|:--:|
+|STL-10|
+<br>
+
+|<img width="500px" src="images/TINY_loss_train.png"/>|
+|:--:|
+|TinyImageNet|
+<br>
+
+
+### Test Accuracy After 10 Epochs
+| |**CIFAR-100 Test Accuracy**|**STL-10 Test Accuracy**|**TinyImageNet Test Accuracy**|
+|:-----:|:-----:|:-----:|:-----:|
+|baseline|37.83|59.975|20.13|
+|batch\_norm|51.23|62.175|31.89|
+|batch\_norm\_5x|36.43|60.1|14.5|
+|batch\_norm\_30x|1.76|40.5875|0.82|
+
+
+Weight Normalization Experiments
+-
+
+### Implementation Details
+
+I tested Weight Normalization on PyTorches native implementation as well as my own.  
+
+Weight Normalization is implemented as a wrapper to a layer, it reparameterizes the weight matrix
+every forward call using two new parameters, g and v.  v is really v / ||v|| during initialization. 
+
+In order to make Weight Norm work with existing models, the best way to implement it is to 
+store parameters v and g in the layer, but use them to recompute the W weight matrix for that layer
+anytime the forward() method is called.
+
+### CIFAR100 Test Results
+
+Setup:
+
+- Learning rate of 0.001
+- 40 Epochs
+- Batch Size of 64
+
+Models:
+
+- Resnet Backbone
+- ConvPool CNN C (from the paper)
+
+
+![My norm vs Torch norm test acc](./images/WNT_testing_accuracy_my_norm_vs_torch_norm_vs_no_norm_0.001%7CAdam%7CCIFAR-100.png)
+![My norm vs Torch norm train loss](./images/WNT_training_loss_my_norm_vs_torch_norm_vs_no_norm_0.001%7CAdam%7CCIFAR-100.png)
+
+### Interpretation of results
+
+In all my experiments, weight normalization prevented the model from overfitting and allowed the model
+to converge at better test accuracies. 
+
+Interestingly, I expected my implementation to match PyTorches, however, there were significant differences
+in the results shown in the graph.  PyTorches implementation has a few slight differences in their forward
+call, but they also do not divide the weight matrix by g when initializing the v matrix.  
+
+Although this is probably harmless, I experimented with this myself but the test results were inconclusive, 
+so the discrepancy is an unsolved oddity. (one potential explanation that I did not have time to explore is 
+that pytorch uses the L2 norm for the weight calculation, I used L1)
