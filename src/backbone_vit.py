@@ -1,3 +1,6 @@
+# Code borrowed from Francesco Zuppichini
+# https://towardsdatascience.com/implementing-visualttransformer-in-pytorch-184f9f16f632 
+
 import torch
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
