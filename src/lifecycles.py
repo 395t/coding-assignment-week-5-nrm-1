@@ -1,4 +1,5 @@
 import torch
+from torch.cuda import amp
 from src.paths import CHECKPOINTS_DIR, DATA_DIR, STATS_DIR
 
 from tqdm import tqdm
@@ -27,11 +28,20 @@ def load_modal(name: str):
     return torch.load(str(CHECKPOINTS_DIR / f'{name}.pt'))
 
 
+def save_dict(dict, name):
+    torch.save(dict, str(CHECKPOINTS_DIR / f'{name}.pt'))
+
+
+def load_dict(name):
+    return torch.load(str(CHECKPOINTS_DIR / f'{name}.pt'))
+
+
 def get_device():
     return "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def train(net: torch.nn.Module, optimizer: torch.optim.Optimizer, trainloader, epochs: int = 10, starting_epoch: int = 0, loader_description: str = ''):
+def train(net: torch.nn.Module, optimizer: torch.optim.Optimizer, trainloader, epochs: int = 10,
+          starting_epoch: int = 0, loader_description: str = '', gradscaler=None):
     device = get_device()
     net.to(device)
     net.train()
@@ -48,11 +58,15 @@ def train(net: torch.nn.Module, optimizer: torch.optim.Optimizer, trainloader, e
 
             images, labels = images.to(device), labels.to(device)
 
-            loss, logits, predicted = net(images, labels)
-
-            loss.backward()
-
-            optimizer.step()
+            with amp.autocast(enabled=bool(gradscaler)):
+                loss, logits, predicted = net(images, labels)
+            if gradscaler:
+                gradscaler.scale(loss).backward()
+                gradscaler.step(optimizer)
+                gradscaler.update()
+            else:
+                loss.backward()
+                optimizer.step()
 
             training_loss += loss.item()
             total_images += labels.size(0)

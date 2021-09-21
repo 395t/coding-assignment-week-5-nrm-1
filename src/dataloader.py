@@ -24,12 +24,12 @@ def get_dataloder(name, batch_size, storage_path):
     elif name == "TINY":
         # source: https://colab.research.google.com/github/yandexdataschool/mlhep2019/blob/master/notebooks/day-3/seminar_convnets.ipynb#scrollTo=tvz-gycUrYD1
         if not os.path.exists(str(DATA_DIR / 'tiny-imagenet-200')):
-            download_tinyImg200()
+            download_tinyImg200(storage_path)
         train_set = datasets.ImageFolder(str(DATA_DIR / 'tiny-imagenet-200/train'), transform=T.ToTensor())
         test_set = load_validation_tinynet(train_set)
 
-    return data.DataLoader(train_set, batch_size=batch_size, shuffle=True), \
-           data.DataLoader(test_set, batch_size=batch_size, shuffle=False)
+    return data.DataLoader(train_set, batch_size=batch_size, shuffle=True, pin_memory=True), \
+           data.DataLoader(test_set, batch_size=batch_size, shuffle=False, pin_memory=True)
 
 
 def load_validation_tinynet(train_set: datasets.ImageFolder) -> datasets.ImageFolder:
