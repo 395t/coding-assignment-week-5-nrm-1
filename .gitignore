@@ -1,6 +1,5 @@
 data
 .idea
-src/stats
 src/data
 src/checkpoints
 tiny-imagenet-200.zip
