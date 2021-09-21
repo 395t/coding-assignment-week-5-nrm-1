@@ -8,8 +8,8 @@ All models with a learning rate of 0.01 resulted in really high loss results, so
 Although 'no dropout' resulted in the best test accuracy, dropout of 50% was chosen for the comparison to other normalization methods, as it is the standard value used in most models.\
 
 ### CIFAR100 Dropout Experiment
-![Dropout Training Loss on CIFAR100](images/DO_training_loss.png)
-![Dropout Training Accuracy on CIFAR100](images/DO_training_acc.png)
+![Dropout Training Loss on CIFAR100](./images/DO_training_loss.png)
+![Dropout Training Accuracy on CIFAR100](./images/DO_training_acc.png)
 
 ### STL and TinyImageNet Experiment
 On the remaining two datasets, dropout was set to 0.5, and learning rate was tested at 0.001 (best performing), and 0.003 (normalizations comparison). The best performing results (LR = 0.001) are shown below (LR = 0.003 results are shown in the normalizations comparison section):
