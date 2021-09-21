@@ -17,3 +17,8 @@ normalizations tend to get more accurate gradient estimations even batch size is
 |instance_norm(7xlr)|47.07|10|*|
 
 # Training Loss plot
+![CIFAR-100 training loss](images/CIFAR100-InsNorm.png)
+![STL10 training loss](images/STL10-InsNorm.png)
+
+From the loss curves, we can see that the baseline always has the steepest descent, but they aren't the best-performing ones.
+It's an evidence that normalization prevents overfitting as well.
