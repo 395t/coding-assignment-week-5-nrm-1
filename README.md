@@ -253,3 +253,7 @@ that pytorch uses the L2 norm for the weight calculation, I used L1)
 - Salimans, T., Kingma, D. 2016, 'Weight Normalization: A Simple Reparameterization to Accelerate Training of Deep Neural Networks', *30th Conference on Neural Information Processing Systems (NIPS 2016)*, pp. 901-909
 - Leo Ba, J., et al. 2016, 'Layer Normalization', arXiv:1607.06450, *University of Toronto*.
 - Ulyanov, D., et al. 2016, 'Instance Normalization: The Missing Ingredient for Fast Stylization', arXiv:1607.08022
+- Dosovitskiy A., et al. 2020, 'An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale', arXiv:2010.11929v2
+
+
+Vision Transformer code from https://github.com/FrancescoSaverioZuppichini/ViT
