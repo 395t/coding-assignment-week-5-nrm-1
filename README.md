@@ -55,6 +55,7 @@ Setup:
 | Batch Normalization | 44.09 | 41.36 |
 | Drop Out | 27.3 | 38.02 |
 | Layer Normalization | 31.74 | 37.04 |
+| Instance Normalization | 44.32 | 35.4 |
 
 ### STL10 Task Performance per Normalization
 
@@ -81,6 +82,7 @@ Setup:
 | Batch Normalization | 56.8875 | 60.1 |
 | Drop Out | 43.89 | 52.08 |
 | Layer Normalization | 46.75 | 57.0 |
+| Instance Normalization | 36.5125 |  52.125 | 
 
 ### Tiny ImageNet Task Performance per Normalization
 

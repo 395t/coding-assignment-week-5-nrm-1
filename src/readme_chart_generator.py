@@ -9,7 +9,8 @@ def create_STL10_003_charts():
         "WN_bb_my_norm_training@0.003|Adam|STL10",
         "STL10_batch_norm_3x_train_metrics",
         "DO_STL10|net_dropout_50_003",
-        "STL10_ln_003_train_metrics"
+        "STL10_ln_003_train_metrics",
+        "STL10_insnorm_3x_train_metrics"
     ]
 
     bl = load_stats(training_loss_stat_files_003[0])
@@ -17,13 +18,15 @@ def create_STL10_003_charts():
     bn = load_stats(training_loss_stat_files_003[2])
     do = load_stats(training_loss_stat_files_003[3])
     ln = load_stats(training_loss_stat_files_003[4])
+    _in = load_stats(training_loss_stat_files_003[5])
 
     labels = [
         "Base Line (no norm)",
         "Weight Normalization",
         "Batch Normalization",
         "Drop Out 50%",
-        "Layer Normalization"
+        "Layer Normalization",
+        "Instance Normalization"
     ]
 
     training_sets = [
@@ -31,7 +34,8 @@ def create_STL10_003_charts():
         wn,
         bn,
         do,
-        ln
+        ln,
+        _in
     ]
 
     # For every config, plot the accuracy across the number of epochs
@@ -48,7 +52,8 @@ def create_STL10_custom_charts():
         "WN_bb_my_norm_training@0.001|Adam|STL10",
         "STL10_batch_norm_5x_train_metrics",
         "DO_STL10|net_dropout_50_lr1",
-        "STL10_ln_001_train_metrics"
+        "STL10_ln_001_train_metrics",
+        "STL10_insnorm_train_metrics"
     ]
 
     bl = load_stats(training_loss_stat_files_003[0])
@@ -56,6 +61,7 @@ def create_STL10_custom_charts():
     bn = load_stats(training_loss_stat_files_003[2])
     do = load_stats(training_loss_stat_files_003[3])
     ln = load_stats(training_loss_stat_files_003[4])
+    _in = load_stats(training_loss_stat_files_003[5])
 
     training_sets = [
         bl,
@@ -63,6 +69,7 @@ def create_STL10_custom_charts():
         bn,
         do,
         ln,
+        _in,
     ]
 
     labels = [
@@ -70,7 +77,8 @@ def create_STL10_custom_charts():
         "Weight Normalization @ 0.001",
         "Batch Normalization @ 0.005",
         "Drop Out 50% @ 0.001",
-        "Layer Normalization @ 0.001"
+        "Layer Normalization @ 0.001",
+        "Instance Normalization @ 0.001"
     ]
 
     # For every config, plot the accuracy across the number of epochs
@@ -165,7 +173,8 @@ def create_CIFAR_003_charts():
         "WN_bb_my_norm_training@0.003|Adam|CIFAR-100",
         "CIFAR-100_batch_norm_3x_train_metrics",
         "net_dropout_50_003",
-        "CIFAR-100_ln_003_train_metrics"
+        "CIFAR-100_ln_003_train_metrics",
+        "CIFAR-100_insnorm_3x_train_metrics"
     ]
 
     tmp_bl = load_stats(training_loss_stat_files_003[0])  # base line went longer than 20 epochs
@@ -178,13 +187,15 @@ def create_CIFAR_003_charts():
     bn = load_stats(training_loss_stat_files_003[2])
     do = load_stats(training_loss_stat_files_003[3])
     ln = load_stats(training_loss_stat_files_003[4])
+    _in = load_stats(training_loss_stat_files_003[5])
 
     labels = [
         "Base Line (no norm)",
         "Weight Normalization",
         "Batch Normalization",
         "Drop Out 50%",
-        "Layer Normalization"
+        "Layer Normalization",
+        "Instance Normalization"
     ]
 
     training_sets = [
@@ -192,7 +203,8 @@ def create_CIFAR_003_charts():
         wn,
         bn,
         do,
-        ln
+        ln,
+        _in
     ]
 
     # For every config, plot the accuracy across the number of epochs
@@ -209,7 +221,8 @@ def create_CIFAR_custom_charts():
         "WN_bb_my_norm_training@0.001|Adam|CIFAR-100",
         "CIFAR-100_batch_norm_5x_train_metrics",
         "net_dropout_50_lr1",
-        "CIFAR-100_ln_001_train_metrics"
+        "CIFAR-100_ln_001_train_metrics",
+        "CIFAR-100_insnorm_7x_train_metrics"
     ]
 
     tmp_bl = load_stats(training_loss_stat_files_003[0])  # base line went longer than 20 epochs
@@ -222,13 +235,16 @@ def create_CIFAR_custom_charts():
     bn = load_stats(training_loss_stat_files_003[2])
     do = load_stats(training_loss_stat_files_003[3])
     ln = load_stats(training_loss_stat_files_003[4])
+    _in = load_stats(training_loss_stat_files_003[5])
+
 
     labels = [
         "Base Line (no norm)",
         "Weight Normalization @ 0.001",
         "Batch Normalization @ 0.005",
         "Drop Out 50% @ 0.001",
-        "Layer Normalization @ 0.001"
+        "Layer Normalization @ 0.001",
+        "Instance Normalization @ 0.007"
     ]
 
     training_sets = [
@@ -236,7 +252,8 @@ def create_CIFAR_custom_charts():
         wn,
         bn,
         do,
-        ln
+        ln,
+        _in
     ]
 
     # For every config, plot the accuracy across the number of epochs
@@ -364,12 +381,12 @@ def create_ViT_TINY_charts():
 
 
 if __name__ == "__main__":
-    # create_STL10_custom_charts()
-    # create_STL10_003_charts()
-    # create_TINY_custom_charts()
-    # create_TINY_003_charts()
-    # create_CIFAR_custom_charts()
-    # create_CIFAR_003_charts()
+    create_STL10_custom_charts()
+    create_STL10_003_charts()
+    create_TINY_custom_charts()
+    create_TINY_003_charts()
+    create_CIFAR_custom_charts()
+    create_CIFAR_003_charts()
 
     create_ViT_CIFAR_charts()
     create_ViT_STL10_charts()
