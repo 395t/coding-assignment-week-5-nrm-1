@@ -20,16 +20,15 @@ class IdentityNormLayer(nn.Module):
 
 
 if __name__ == "__main__":
-    dataset, num_classes = "CIFAR-100", 100
+    dataset, num_classes = "STL10", 10
     experiments = {
         "baseline": {"norm": IdentityNormLayer, "lr": 1e-3},
         "insnorm": {"norm": nn.InstanceNorm2d, "lr": 1e-3},
         "insnorm_3x": {"norm": nn.InstanceNorm2d, "lr": 3e-3},
-        "insnorm_7x": {"norm": nn.InstanceNorm2d, "lr": 7e-3},
         "insnorm_30x": {"norm": nn.InstanceNorm2d, "lr": 3e-2},
     }
 
-    train_loader, test_loader = src.get_dataloder(dataset, 256, "./data")
+    train_loader, test_loader = src.get_dataloder(dataset, 128, "./data")
 
     for exp_name, config in experiments.items():
         print(f"---Exp {exp_name}, dataset {dataset}---")
@@ -39,7 +38,7 @@ if __name__ == "__main__":
         lr = config["lr"]
         opt = torch.optim.Adam(net.parameters(), lr=lr)
         scaler = amp.GradScaler()
-        train_metrics = train(net, opt, train_loader, epochs=16, gradscaler=scaler)
+        train_metrics = train(net, opt, train_loader, epochs=10, gradscaler=scaler, gpu="cuda:1")
 
         save_path = f"{dataset}_{exp_name}_train_metrics"
         save_stats(train_metrics, save_path)

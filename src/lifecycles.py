@@ -41,8 +41,11 @@ def get_device():
 
 
 def train(net: torch.nn.Module, optimizer: torch.optim.Optimizer, trainloader, epochs: int = 10,
-          starting_epoch: int = 0, loader_description: str = '', gradscaler=None):
-    device = get_device()
+          starting_epoch: int = 0, loader_description: str = '', gradscaler=None, gpu=None):
+    if gpu:
+        device = torch.device(gpu)
+    else:
+        device = get_device()
     net.to(device)
     net.train()
 
