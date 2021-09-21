@@ -26,4 +26,4 @@ Dropout Training Loss on STL10                                                  
 - Ioffe, S., Szegendy, C. 2015, 'Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift', Proceedings of the 32nd International Conference on Machine Learning, PMLR 37:448-456
 - Salimans, T., Kingma, D. 2016, 'Weight Normalization: A Simple Reparameterization to Accelerate Training of Deep Neural Networks', 30th Conference on Neural Information Processing Systems (NIPS 2016), pp. 901-909
 - Leo Ba, J., et al. 2016, 'Layer Normalization', arXiv:1607.06450, University of Toronto.
-- Ulyanov, D., et al 2016, 'Instance Normalization: The Missing Ingredient for Fast Stylization', arXiv:1607.08022
+- Ulyanov, D., et al. 2016, 'Instance Normalization: The Missing Ingredient for Fast Stylization', arXiv:1607.08022
