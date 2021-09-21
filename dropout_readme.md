@@ -19,3 +19,11 @@ Dropout Training Accuracy on STL10                                              
 ![Dropout Training Accuracy on STL10](./images/DO_STL10_001_acc_test_dropout.png)   |  ![Dropout Training Accuracy on TinyImageNet](./images/DO_TINY_001_acc_test_dropout.png)
 Dropout Training Loss on STL10                                                      |  Dropout Training Loss on TinyImageNet
 ![Dropout Training Loss on STL10](./images/DO_STL10_001_loss_test_dropout.png)      |  ![Dropout Training Loss on TinyImageNet](./images/DO_TINY_001_loss_test_dropout.png)
+
+
+# References
+- Srivastava, N., et al. 2014, 'Dropout: A Simple Way to Prevent Neural Networks from Overfitting', Journal of Machine Learning Research, vol. 15, pp. 1929-1958.
+- Ioffe, S., Szegendy, C. 2015, 'Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift', Proceedings of the 32nd International Conference on Machine Learning, PMLR 37:448-456
+- Salimans, T., Kingma, D. 2016, 'Weight Normalization: A Simple Reparameterization to Accelerate Training of Deep Neural Networks', 30th Conference on Neural Information Processing Systems (NIPS 2016), pp. 901-909
+- Leo Ba, J., et al. 2016, 'Layer Normalization', arXiv:1607.06450, University of Toronto.
+- Ulyanov, D., et al 2016, 'Instance Normalization: The Missing Ingredient for Fast Stylization', arXiv:1607.08022
