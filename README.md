@@ -247,7 +247,7 @@ so the discrepancy is an unsolved oddity. (one potential explanation that I did 
 that pytorch uses the L2 norm for the weight calculation, I used L1)
 
 
--
+
 # References
 - Srivastava, N., et al. 2014, 'Dropout: A Simple Way to Prevent Neural Networks from Overfitting', Journal of Machine Learning Research, vol. 15, pp. 1929-1958.
 - Ioffe, S., Szegendy, C. 2015, 'Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift', Proceedings of the 32nd International Conference on Machine Learning, PMLR 37:448-456
